@@ -14,6 +14,19 @@
 
 <title>Introduction to {equatiomatic}</title>
 
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
 <script>// Hide empty <a> tag within highlighted CodeBlock for screen reader accessibility (see https://github.com/jgm/pandoc/issues/6352#issuecomment-626106786) -->
 // v0.0.1
 // Written by JooYoung Seo (jooyoung@psu.edu) and Atsushi Yasumoto on June 1st, 2020.
@@ -31,22 +44,30 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
 
 <style type="text/css">code{white-space: pre;}</style>
 <style type="text/css" data-origin="pandoc">
-code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
-code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode { white-space: pre; position: relative; }
 div.sourceCode { margin: 1em 0; }
 pre.sourceCode { margin: 0; }
 @media screen {
 div.sourceCode { overflow: auto; }
 }
 @media print {
-code.sourceCode { white-space: pre-wrap; }
-code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
   { counter-reset: source-line 0; }
@@ -66,7 +87,7 @@ pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-le
 div.sourceCode
   {   }
 @media screen {
-code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 code span.al { color: #ff0000; font-weight: bold; } /* Alert */
 code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
@@ -120,6 +141,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   }
 })();
 </script>
+
 
 
 
@@ -347,12 +369,10 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <span id="cb2-3"><a href="#cb2-3"></a><span class="co"># fit a basic multiple linear regression model</span></span>
 <span id="cb2-4"><a href="#cb2-4"></a>m &lt;-<span class="st"> </span><span class="kw">lm</span>(bill_length_mm <span class="op">~</span><span class="st"> </span>bill_depth_mm <span class="op">+</span><span class="st"> </span>flipper_length_mm, penguins)</span></code></pre></div>
 <p>Now we can pull the TeX code with <code>extract_eq</code></p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a><span class="kw">extract_eq</span>(m)</span>
-<span id="cb3-2"><a href="#cb3-2"></a><span class="co">#&gt; $$</span></span>
-<span id="cb3-3"><a href="#cb3-3"></a><span class="co">#&gt; \operatorname{bill\_length\_mm} = \alpha + \beta_{1}(\operatorname{bill\_depth\_mm}) + \beta_{2}(\operatorname{flipper\_length\_mm}) + \epsilon</span></span>
-<span id="cb3-4"><a href="#cb3-4"></a><span class="co">#&gt; $$</span></span></code></pre></div>
-<p>This is moderately helpful, but if we set the code chunk to <code>results = &quot;asis&quot;</code>, as shown below, we get the actual equation when we knit the R Markdown document!</p>
-<p><img src="data:image/png;base64,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" /></p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a><span class="kw">extract_eq</span>(m)</span></code></pre></div>
+<p><span class="math display">\[
+\operatorname{bill\_length\_mm} = \alpha + \beta_{1}(\operatorname{bill\_depth\_mm}) + \beta_{2}(\operatorname{flipper\_length\_mm}) + \epsilon
+\]</span></p>
 <p>You can of course set <code>echo = FALSE</code> as well, and then you’ll get just the equation, which will look like the below.</p>
 <p><span class="math display">\[
 \operatorname{bill\_length\_mm} = \alpha + \beta_{1}(\operatorname{bill\_depth\_mm}) + \beta_{2}(\operatorname{flipper\_length\_mm}) + \epsilon
@@ -424,8 +444,8 @@ bill\_length\_mm &amp;= \alpha + \beta_{1}(bill\_depth\_mm) + \beta_{2}(island_{
 <div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1"></a><span class="kw">extract_eq</span>(m2, <span class="dt">wrap =</span> <span class="ot">TRUE</span>, <span class="dt">use_coefs =</span> <span class="ot">TRUE</span>)</span></code></pre></div>
 <p><span class="math display">\[
 \begin{aligned}
-\operatorname{bill\_length\_mm} &amp;= 63.72 - 1.16(\operatorname{bill\_depth\_mm}) - 54.12(\operatorname{island}_{\operatorname{Dream}}) - 35.13(\operatorname{island}_{\operatorname{Torgersen}})\ + \\
-&amp;\quad 3.05(\operatorname{bill\_depth\_mm} \times \operatorname{island}_{\operatorname{Dream}}) + 1.73(\operatorname{bill\_depth\_mm} \times \operatorname{island}_{\operatorname{Torgersen}}) + \epsilon
+\operatorname{\widehat{bill\_length\_mm}} &amp;= 63.72 - 1.16(\operatorname{bill\_depth\_mm}) - 54.12(\operatorname{island}_{\operatorname{Dream}}) - 35.13(\operatorname{island}_{\operatorname{Torgersen}})\ + \\
+&amp;\quad 3.05(\operatorname{bill\_depth\_mm} \times \operatorname{island}_{\operatorname{Dream}}) + 1.73(\operatorname{bill\_depth\_mm} \times \operatorname{island}_{\operatorname{Torgersen}})
 \end{aligned}
 \]</span></p>
 </div>
@@ -435,8 +455,8 @@ bill\_length\_mm &amp;= \alpha + \beta_{1}(bill\_depth\_mm) + \beta_{2}(island_{
 <p>While the above examples focused on regression models (and the <code>lm()</code> function), {equatiomatic} supports output from other model types as well, specifically:</p>
 <table>
 <colgroup>
-<col width="29%"></col>
-<col width="70%"></col>
+<col width="49%"></col>
+<col width="50%"></col>
 </colgroup>
 <thead>
 <tr class="header">
@@ -465,6 +485,14 @@ bill\_length\_mm &amp;= \alpha + \beta_{1}(bill\_depth\_mm) + \beta_{2}(island_{
 <td align="left">ordinal probit regression</td>
 <td align="left"><code>MASS::polr(method = &#39;probit&#39;)</code>; <code>ordinal::clm(link = &#39;probit&#39;)</code></td>
 </tr>
+<tr class="even">
+<td align="left">auto-regressive integrated moving average</td>
+<td align="left"><code>forecast::Arima</code></td>
+</tr>
+<tr class="odd">
+<td align="left">regression with auto-regressive integrated moving average errors</td>
+<td align="left"><code>forecast::Arima</code></td>
+</tr>
 </tbody>
 </table>
 <p>Here are a few basic examples using these supported model types:</p>
@@ -478,17 +506,17 @@ bill\_length\_mm &amp;= \alpha + \beta_{1}(bill\_depth\_mm) + \beta_{2}(island_{
 <p><span class="math display">\[
 \begin{aligned}
 \log\left[ \frac { P( \operatorname{sex} = \operatorname{male} ) }{ 1 - P( \operatorname{sex} = \operatorname{male} ) } \right] &amp;= \alpha + \beta_{1}(\operatorname{species}_{\operatorname{Chinstrap}}) + \beta_{2}(\operatorname{species}_{\operatorname{Gentoo}}) + \beta_{3}(\operatorname{bill\_length\_mm})\ + \\
-&amp;\quad \beta_{4}(\operatorname{species}_{\operatorname{Chinstrap}} \times \operatorname{bill\_length\_mm}) + \beta_{5}(\operatorname{species}_{\operatorname{Gentoo}} \times \operatorname{bill\_length\_mm}) + \epsilon
+&amp;\quad \beta_{4}(\operatorname{species}_{\operatorname{Chinstrap}} \times \operatorname{bill\_length\_mm}) + \beta_{5}(\operatorname{species}_{\operatorname{Gentoo}} \times \operatorname{bill\_length\_mm})
 \end{aligned}
 \]</span></p>
 <p>You can also (optionally) show the how the data are assumed to be distributed.</p>
 <div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1"></a><span class="kw">extract_eq</span>(lr, <span class="dt">wrap =</span> <span class="ot">TRUE</span>, <span class="dt">show_distribution =</span> <span class="ot">TRUE</span>)</span></code></pre></div>
 <p><span class="math display">\[
 \begin{aligned}
-\operatorname{sex}_{\operatorname{male}} &amp;\sim B\left(\operatorname{prob} = \hat{P},\operatorname{size} = 344\right) \\
- \log\left[ \frac {\hat{P}}{1 - \hat{P}} \right] 
+\operatorname{sex} &amp;\sim Bernoulli\left(\operatorname{prob}_{\operatorname{sex} = \operatorname{male}}= \hat{P}\right) \\
+ \log\left[ \frac { \hat{P} }{ 1 - \hat{P} } \right] 
  &amp;= \alpha + \beta_{1}(\operatorname{species}_{\operatorname{Chinstrap}}) + \beta_{2}(\operatorname{species}_{\operatorname{Gentoo}}) + \beta_{3}(\operatorname{bill\_length\_mm})\ + \\
-&amp;\quad \beta_{4}(\operatorname{species}_{\operatorname{Chinstrap}} \times \operatorname{bill\_length\_mm}) + \beta_{5}(\operatorname{species}_{\operatorname{Gentoo}} \times \operatorname{bill\_length\_mm}) + \epsilon
+&amp;\quad \beta_{4}(\operatorname{species}_{\operatorname{Chinstrap}} \times \operatorname{bill\_length\_mm}) + \beta_{5}(\operatorname{species}_{\operatorname{Gentoo}} \times \operatorname{bill\_length\_mm})
 \end{aligned}
 \]</span></p>
 </div>
@@ -502,18 +530,18 @@ bill\_length\_mm &amp;= \alpha + \beta_{1}(bill\_depth\_mm) + \beta_{2}(island_{
 <span id="cb13-5"><a href="#cb13-5"></a><span class="kw">extract_eq</span>(pr, <span class="dt">wrap =</span> <span class="ot">TRUE</span>)</span></code></pre></div>
 <p><span class="math display">\[
 \begin{aligned}
-P(\operatorname{sex} = \operatorname{male}) &amp;= \Phi[\alpha + \beta_{1}(\operatorname{species}_{\operatorname{Chinstrap}}) + \beta_{2}(\operatorname{species}_{\operatorname{Gentoo}}) + \beta_{3}(\operatorname{bill\_length\_mm})\ + \\
-&amp;\qquad\ \beta_{4}(\operatorname{species}_{\operatorname{Chinstrap}} \times \operatorname{bill\_length\_mm}) + \beta_{5}(\operatorname{species}_{\operatorname{Gentoo}} \times \operatorname{bill\_length\_mm}) + \epsilon]
+P( \operatorname{sex} = \operatorname{male} ) &amp;= \Phi[\alpha + \beta_{1}(\operatorname{species}_{\operatorname{Chinstrap}}) + \beta_{2}(\operatorname{species}_{\operatorname{Gentoo}}) + \beta_{3}(\operatorname{bill\_length\_mm})\ + \\
+&amp;\qquad\ \beta_{4}(\operatorname{species}_{\operatorname{Chinstrap}} \times \operatorname{bill\_length\_mm}) + \beta_{5}(\operatorname{species}_{\operatorname{Gentoo}} \times \operatorname{bill\_length\_mm})]
 \end{aligned}
 \]</span></p>
 <p>Again, you can (optionally) show the how the data are assumed distributed.</p>
 <div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1"></a><span class="kw">extract_eq</span>(pr, <span class="dt">wrap =</span> <span class="ot">TRUE</span>, <span class="dt">show_distribution =</span> <span class="ot">TRUE</span>)</span></code></pre></div>
 <p><span class="math display">\[
 \begin{aligned}
-\operatorname{sex}_{\operatorname{male}} &amp;\sim B\left(\operatorname{prob} = \hat{P},\operatorname{size} = 344\right) \\
- \log\left[ \frac {\hat{P}}{1 - \hat{P}} \right] 
+\operatorname{sex} &amp;\sim Bernoulli\left(\operatorname{prob}_{\operatorname{sex} = \operatorname{male}}= \hat{P}\right) \\
+ \hat{P} 
  &amp;= \Phi[\alpha + \beta_{1}(\operatorname{species}_{\operatorname{Chinstrap}}) + \beta_{2}(\operatorname{species}_{\operatorname{Gentoo}}) + \beta_{3}(\operatorname{bill\_length\_mm})\ + \\
-&amp;\qquad\ \beta_{4}(\operatorname{species}_{\operatorname{Chinstrap}} \times \operatorname{bill\_length\_mm}) + \beta_{5}(\operatorname{species}_{\operatorname{Gentoo}} \times \operatorname{bill\_length\_mm}) + \epsilon]
+&amp;\qquad\ \beta_{4}(\operatorname{species}_{\operatorname{Chinstrap}} \times \operatorname{bill\_length\_mm}) + \beta_{5}(\operatorname{species}_{\operatorname{Gentoo}} \times \operatorname{bill\_length\_mm})]
 \end{aligned}
 \]</span></p>
 </div>
@@ -602,17 +630,13 @@ P(\operatorname{sex} = \operatorname{male}) &amp;= \Phi[\alpha + \beta_{1}(\oper
 <p><span class="math display">\[
 \begin{aligned}
 \log\left[ \frac { P( \operatorname{1} \geq \operatorname{2} ) }{ 1 - P( \operatorname{1} \geq \operatorname{2} ) } \right] &amp;= \alpha_{1} + \beta_{1}(\operatorname{temp}_{\operatorname{warm}})\ + \\
-&amp;\quad \beta_{2}(\operatorname{contact}_{\operatorname{yes}}) + \beta_{3}(\operatorname{temp}_{\operatorname{warm}} \times \operatorname{contact}_{\operatorname{yes}})\ + \\
-&amp;\quad \epsilon \\
+&amp;\quad \beta_{2}(\operatorname{contact}_{\operatorname{yes}}) + \beta_{3}(\operatorname{temp}_{\operatorname{warm}} \times \operatorname{contact}_{\operatorname{yes}}) \\
 \log\left[ \frac { P( \operatorname{2} \geq \operatorname{3} ) }{ 1 - P( \operatorname{2} \geq \operatorname{3} ) } \right] &amp;= \alpha_{2} + \beta_{1}(\operatorname{temp}_{\operatorname{warm}})\ + \\
-&amp;\quad \beta_{2}(\operatorname{contact}_{\operatorname{yes}}) + \beta_{3}(\operatorname{temp}_{\operatorname{warm}} \times \operatorname{contact}_{\operatorname{yes}})\ + \\
-&amp;\quad \epsilon \\
+&amp;\quad \beta_{2}(\operatorname{contact}_{\operatorname{yes}}) + \beta_{3}(\operatorname{temp}_{\operatorname{warm}} \times \operatorname{contact}_{\operatorname{yes}}) \\
 \log\left[ \frac { P( \operatorname{3} \geq \operatorname{4} ) }{ 1 - P( \operatorname{3} \geq \operatorname{4} ) } \right] &amp;= \alpha_{3} + \beta_{1}(\operatorname{temp}_{\operatorname{warm}})\ + \\
-&amp;\quad \beta_{2}(\operatorname{contact}_{\operatorname{yes}}) + \beta_{3}(\operatorname{temp}_{\operatorname{warm}} \times \operatorname{contact}_{\operatorname{yes}})\ + \\
-&amp;\quad \epsilon \\
+&amp;\quad \beta_{2}(\operatorname{contact}_{\operatorname{yes}}) + \beta_{3}(\operatorname{temp}_{\operatorname{warm}} \times \operatorname{contact}_{\operatorname{yes}}) \\
 \log\left[ \frac { P( \operatorname{4} \geq \operatorname{5} ) }{ 1 - P( \operatorname{4} \geq \operatorname{5} ) } \right] &amp;= \alpha_{4} + \beta_{1}(\operatorname{temp}_{\operatorname{warm}})\ + \\
-&amp;\quad \beta_{2}(\operatorname{contact}_{\operatorname{yes}}) + \beta_{3}(\operatorname{temp}_{\operatorname{warm}} \times \operatorname{contact}_{\operatorname{yes}})\ + \\
-&amp;\quad \epsilon
+&amp;\quad \beta_{2}(\operatorname{contact}_{\operatorname{yes}}) + \beta_{3}(\operatorname{temp}_{\operatorname{warm}} \times \operatorname{contact}_{\operatorname{yes}})
 \end{aligned}
 \]</span></p>
 </div>
@@ -630,18 +654,14 @@ P(\operatorname{sex} = \operatorname{male}) &amp;= \Phi[\alpha + \beta_{1}(\oper
 <span id="cb17-10"><a href="#cb17-10"></a><span class="co">#&gt; Re-fitting to get Hessian</span></span></code></pre></div>
 <p><span class="math display">\[
 \begin{aligned}
-P(\operatorname{1} \geq \operatorname{2}) &amp;= \Phi[\alpha_{1} + \beta_{1}(\operatorname{temp}_{\operatorname{warm}})\ + \\
-&amp;\qquad\ \beta_{2}(\operatorname{contact}_{\operatorname{yes}}) + \beta_{3}(\operatorname{temp}_{\operatorname{warm}} \times \operatorname{contact}_{\operatorname{yes}})\ + \\
-&amp;\qquad\ \epsilon] \\
-P(\operatorname{2} \geq \operatorname{3}) &amp;= \Phi[\alpha_{2} + \beta_{1}(\operatorname{temp}_{\operatorname{warm}})\ + \\
-&amp;\qquad\ \beta_{2}(\operatorname{contact}_{\operatorname{yes}}) + \beta_{3}(\operatorname{temp}_{\operatorname{warm}} \times \operatorname{contact}_{\operatorname{yes}})\ + \\
-&amp;\qquad\ \epsilon] \\
-P(\operatorname{3} \geq \operatorname{4}) &amp;= \Phi[\alpha_{3} + \beta_{1}(\operatorname{temp}_{\operatorname{warm}})\ + \\
-&amp;\qquad\ \beta_{2}(\operatorname{contact}_{\operatorname{yes}}) + \beta_{3}(\operatorname{temp}_{\operatorname{warm}} \times \operatorname{contact}_{\operatorname{yes}})\ + \\
-&amp;\qquad\ \epsilon] \\
-P(\operatorname{4} \geq \operatorname{5}) &amp;= \Phi[\alpha_{4} + \beta_{1}(\operatorname{temp}_{\operatorname{warm}})\ + \\
-&amp;\qquad\ \beta_{2}(\operatorname{contact}_{\operatorname{yes}}) + \beta_{3}(\operatorname{temp}_{\operatorname{warm}} \times \operatorname{contact}_{\operatorname{yes}})\ + \\
-&amp;\qquad\ \epsilon]
+P( \operatorname{1} \geq \operatorname{2} ) &amp;= \Phi[\alpha_{1} + \beta_{1}(\operatorname{temp}_{\operatorname{warm}})\ + \\
+&amp;\qquad\ \beta_{2}(\operatorname{contact}_{\operatorname{yes}}) + \beta_{3}(\operatorname{temp}_{\operatorname{warm}} \times \operatorname{contact}_{\operatorname{yes}})] \\
+P( \operatorname{2} \geq \operatorname{3} ) &amp;= \Phi[\alpha_{2} + \beta_{1}(\operatorname{temp}_{\operatorname{warm}})\ + \\
+&amp;\qquad\ \beta_{2}(\operatorname{contact}_{\operatorname{yes}}) + \beta_{3}(\operatorname{temp}_{\operatorname{warm}} \times \operatorname{contact}_{\operatorname{yes}})] \\
+P( \operatorname{3} \geq \operatorname{4} ) &amp;= \Phi[\alpha_{3} + \beta_{1}(\operatorname{temp}_{\operatorname{warm}})\ + \\
+&amp;\qquad\ \beta_{2}(\operatorname{contact}_{\operatorname{yes}}) + \beta_{3}(\operatorname{temp}_{\operatorname{warm}} \times \operatorname{contact}_{\operatorname{yes}})] \\
+P( \operatorname{4} \geq \operatorname{5} ) &amp;= \Phi[\alpha_{4} + \beta_{1}(\operatorname{temp}_{\operatorname{warm}})\ + \\
+&amp;\qquad\ \beta_{2}(\operatorname{contact}_{\operatorname{yes}}) + \beta_{3}(\operatorname{temp}_{\operatorname{warm}} \times \operatorname{contact}_{\operatorname{yes}})]
 \end{aligned}
 \]</span></p>
 </div>
@@ -659,17 +679,13 @@ P(\operatorname{4} \geq \operatorname{5}) &amp;= \Phi[\alpha_{4} + \beta_{1}(\op
 <p><span class="math display">\[
 \begin{aligned}
 \log\left[ \frac { P( \operatorname{1} \geq \operatorname{2} ) }{ 1 - P( \operatorname{1} \geq \operatorname{2} ) } \right] &amp;= \alpha_{1} + \beta_{1}(\operatorname{temp}_{\operatorname{warm}})\ + \\
-&amp;\quad \beta_{2}(\operatorname{contact}_{\operatorname{yes}}) + \beta_{3}(\operatorname{temp}_{\operatorname{warm}} \times \operatorname{contact}_{\operatorname{yes}})\ + \\
-&amp;\quad \epsilon \\
+&amp;\quad \beta_{2}(\operatorname{contact}_{\operatorname{yes}}) + \beta_{3}(\operatorname{temp}_{\operatorname{warm}} \times \operatorname{contact}_{\operatorname{yes}}) \\
 \log\left[ \frac { P( \operatorname{2} \geq \operatorname{3} ) }{ 1 - P( \operatorname{2} \geq \operatorname{3} ) } \right] &amp;= \alpha_{2} + \beta_{1}(\operatorname{temp}_{\operatorname{warm}})\ + \\
-&amp;\quad \beta_{2}(\operatorname{contact}_{\operatorname{yes}}) + \beta_{3}(\operatorname{temp}_{\operatorname{warm}} \times \operatorname{contact}_{\operatorname{yes}})\ + \\
-&amp;\quad \epsilon \\
+&amp;\quad \beta_{2}(\operatorname{contact}_{\operatorname{yes}}) + \beta_{3}(\operatorname{temp}_{\operatorname{warm}} \times \operatorname{contact}_{\operatorname{yes}}) \\
 \log\left[ \frac { P( \operatorname{3} \geq \operatorname{4} ) }{ 1 - P( \operatorname{3} \geq \operatorname{4} ) } \right] &amp;= \alpha_{3} + \beta_{1}(\operatorname{temp}_{\operatorname{warm}})\ + \\
-&amp;\quad \beta_{2}(\operatorname{contact}_{\operatorname{yes}}) + \beta_{3}(\operatorname{temp}_{\operatorname{warm}} \times \operatorname{contact}_{\operatorname{yes}})\ + \\
-&amp;\quad \epsilon \\
+&amp;\quad \beta_{2}(\operatorname{contact}_{\operatorname{yes}}) + \beta_{3}(\operatorname{temp}_{\operatorname{warm}} \times \operatorname{contact}_{\operatorname{yes}}) \\
 \log\left[ \frac { P( \operatorname{4} \geq \operatorname{5} ) }{ 1 - P( \operatorname{4} \geq \operatorname{5} ) } \right] &amp;= \alpha_{4} + \beta_{1}(\operatorname{temp}_{\operatorname{warm}})\ + \\
-&amp;\quad \beta_{2}(\operatorname{contact}_{\operatorname{yes}}) + \beta_{3}(\operatorname{temp}_{\operatorname{warm}} \times \operatorname{contact}_{\operatorname{yes}})\ + \\
-&amp;\quad \epsilon
+&amp;\quad \beta_{2}(\operatorname{contact}_{\operatorname{yes}}) + \beta_{3}(\operatorname{temp}_{\operatorname{warm}} \times \operatorname{contact}_{\operatorname{yes}})
 \end{aligned}
 \]</span></p>
 </div>
@@ -682,18 +698,14 @@ P(\operatorname{4} \geq \operatorname{5}) &amp;= \Phi[\alpha_{4} + \beta_{1}(\op
 <span id="cb19-5"><a href="#cb19-5"></a><span class="kw">extract_eq</span>(ordinal_probit, <span class="dt">wrap =</span> <span class="ot">TRUE</span>, <span class="dt">terms_per_line =</span> <span class="dv">2</span>)</span></code></pre></div>
 <p><span class="math display">\[
 \begin{aligned}
-P(\operatorname{1} \geq \operatorname{2}) &amp;= \Phi[\alpha_{1} + \beta_{1}(\operatorname{temp}_{\operatorname{warm}})\ + \\
-&amp;\qquad\ \beta_{2}(\operatorname{contact}_{\operatorname{yes}}) + \beta_{3}(\operatorname{temp}_{\operatorname{warm}} \times \operatorname{contact}_{\operatorname{yes}})\ + \\
-&amp;\qquad\ \epsilon] \\
-P(\operatorname{2} \geq \operatorname{3}) &amp;= \Phi[\alpha_{2} + \beta_{1}(\operatorname{temp}_{\operatorname{warm}})\ + \\
-&amp;\qquad\ \beta_{2}(\operatorname{contact}_{\operatorname{yes}}) + \beta_{3}(\operatorname{temp}_{\operatorname{warm}} \times \operatorname{contact}_{\operatorname{yes}})\ + \\
-&amp;\qquad\ \epsilon] \\
-P(\operatorname{3} \geq \operatorname{4}) &amp;= \Phi[\alpha_{3} + \beta_{1}(\operatorname{temp}_{\operatorname{warm}})\ + \\
-&amp;\qquad\ \beta_{2}(\operatorname{contact}_{\operatorname{yes}}) + \beta_{3}(\operatorname{temp}_{\operatorname{warm}} \times \operatorname{contact}_{\operatorname{yes}})\ + \\
-&amp;\qquad\ \epsilon] \\
-P(\operatorname{4} \geq \operatorname{5}) &amp;= \Phi[\alpha_{4} + \beta_{1}(\operatorname{temp}_{\operatorname{warm}})\ + \\
-&amp;\qquad\ \beta_{2}(\operatorname{contact}_{\operatorname{yes}}) + \beta_{3}(\operatorname{temp}_{\operatorname{warm}} \times \operatorname{contact}_{\operatorname{yes}})\ + \\
-&amp;\qquad\ \epsilon]
+P( \operatorname{1} \geq \operatorname{2} ) &amp;= \Phi[\alpha_{1} + \beta_{1}(\operatorname{temp}_{\operatorname{warm}})\ + \\
+&amp;\qquad\ \beta_{2}(\operatorname{contact}_{\operatorname{yes}}) + \beta_{3}(\operatorname{temp}_{\operatorname{warm}} \times \operatorname{contact}_{\operatorname{yes}})] \\
+P( \operatorname{2} \geq \operatorname{3} ) &amp;= \Phi[\alpha_{2} + \beta_{1}(\operatorname{temp}_{\operatorname{warm}})\ + \\
+&amp;\qquad\ \beta_{2}(\operatorname{contact}_{\operatorname{yes}}) + \beta_{3}(\operatorname{temp}_{\operatorname{warm}} \times \operatorname{contact}_{\operatorname{yes}})] \\
+P( \operatorname{3} \geq \operatorname{4} ) &amp;= \Phi[\alpha_{3} + \beta_{1}(\operatorname{temp}_{\operatorname{warm}})\ + \\
+&amp;\qquad\ \beta_{2}(\operatorname{contact}_{\operatorname{yes}}) + \beta_{3}(\operatorname{temp}_{\operatorname{warm}} \times \operatorname{contact}_{\operatorname{yes}})] \\
+P( \operatorname{4} \geq \operatorname{5} ) &amp;= \Phi[\alpha_{4} + \beta_{1}(\operatorname{temp}_{\operatorname{warm}})\ + \\
+&amp;\qquad\ \beta_{2}(\operatorname{contact}_{\operatorname{yes}}) + \beta_{3}(\operatorname{temp}_{\operatorname{warm}} \times \operatorname{contact}_{\operatorname{yes}})]
 \end{aligned}
 \]</span></p>
 </div>

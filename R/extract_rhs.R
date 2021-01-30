@@ -1,3 +1,15 @@
+#' Generic function for extracting the right-hand side from a model
+#'
+#' @keywords internal
+#'
+#' @param model A fitted model
+#' @param \dots additional arguments passed to the specific extractor
+#' @noRd
+
+extract_rhs <- function(model, ...) {
+  UseMethod("extract_rhs", model)
+}
+
 #' Extract right-hand side
 #'
 #' Extract a data frame with list columns for the primary terms and subscripts
@@ -10,7 +22,8 @@
 #' @return A list with one element per future equation term. Term components
 #'   like subscripts are nested inside each list element. List elements with two
 #'   or more terms are interactions.
-#'
+#' @noRd
+#' @export
 #' @examples \dontrun{
 #' library(palmerpenguins)
 #' mod1 <- lm(body_mass_g ~ bill_length_mm + species * flipper_length_mm, penguins)
@@ -60,9 +73,8 @@
 #' #>   ..$ : Named chr  "Gentoo" ""
 #' #>   .. ..- attr(*, "names")= chr [1:2] "species" "flipper_length_mm"
 #' }
-#' @noRd
 
-extract_rhs <- function(model) {
+extract_rhs.default <- function(model) {
   # Extract RHS from formula
   formula_rhs <- labels(terms(formula(model)))
 
@@ -83,6 +95,351 @@ extract_rhs <- function(model) {
   class(full_rhs) <- c("data.frame", class(model))
   full_rhs
 }
+
+#' @noRd
+#' @export
+extract_rhs.lmerMod <- function(model) {
+  # Extract RHS from formula
+  formula_rhs <- labels(terms(formula(model)))
+
+  # Extract unique (primary) terms from formula (no interactions)
+  formula_rhs_terms <- formula_rhs[!grepl(":", formula_rhs)]
+  formula_rhs_terms <- gsub("^`?(.+)`$?", "\\1", formula_rhs_terms)
+  
+  # Extract coefficient names and values from model
+  full_rhs <- broom.mixed::tidy(model)
+  
+  full_rhs$term <- vapply(full_rhs$term, order_interaction,
+                          FUN.VALUE = character(1))
+  full_rhs$group <- recode_groups(full_rhs)
+  
+  full_rhs$original_order <- seq_len(nrow(full_rhs))
+  full_rhs$term <- gsub("^`?(.+)`$?", "\\1", full_rhs$term)
+  
+  # Split interactions split into character vectors
+  full_rhs$split <- strsplit(full_rhs$term, ":")
+  
+  # Figure out which predictors are at which level
+  # could probs put this in its own function
+  group_coefs <- detect_group_coef(model, full_rhs)
+  all_terms <- unique(unlist(full_rhs$split[full_rhs$effect == "fixed"]))
+  l1_terms <- setdiff(all_terms, names(group_coefs))
+  l1_terms <- setNames(rep("l1", length(l1_terms)), l1_terms)
+  
+  var_levs <- c(l1_terms, group_coefs)
+  
+  full_rhs$primary <- lapply(full_rhs$term, function(x) "")
+  full_rhs$primary[full_rhs$effect == "fixed"] <- extract_primary_term(
+    formula_rhs_terms,
+    full_rhs$term[full_rhs$effect == "fixed"]
+  )
+  
+  # make sure split and primary are in the same order
+  full_rhs$primary[full_rhs$effect == "fixed"] <- Map(function(prim, splt) {
+    ord <- vapply(prim, function(x) grep(x, splt), FUN.VALUE = integer(1))
+    names(sort(ord))
+  }, 
+  full_rhs$primary[full_rhs$effect == "fixed"], 
+  full_rhs$split[full_rhs$effect == "fixed"])
+  
+  full_rhs$subscripts <- lapply(full_rhs$term, function(x) "")
+  full_rhs$subscripts[full_rhs$effect == "fixed"] <- extract_all_subscripts(
+    full_rhs$primary[full_rhs$effect == "fixed"],
+    full_rhs$split[full_rhs$effect == "fixed"]
+  )
+  
+  full_rhs$pred_level <- lapply(full_rhs$primary, function(x) {
+    var_levs[names(var_levs) %in% x]
+  })
+  
+  full_rhs$pred_level[full_rhs$effect == "fixed"] <- Map(function(predlev, splt) {
+    ord <- vapply(names(predlev), function(x) grep(x, splt), FUN.VALUE = integer(1))
+    ord <- names(sort(ord))
+    predlev[ord]
+  }, 
+  full_rhs$pred_level[full_rhs$effect == "fixed"], 
+  full_rhs$split[full_rhs$effect == "fixed"])
+  
+  full_rhs$l1 <- vapply(full_rhs$pred_level, function(x) {
+    (length(x) > 0 & all(x == "l1"))
+  }, FUN.VALUE = logical(1))
+  full_rhs$l1 <- ifelse(full_rhs$term == "(Intercept)", 
+                        TRUE,
+                        full_rhs$l1)
+  
+  full_rhs$crosslevel <- detect_crosslevel(full_rhs$primary, 
+                                           full_rhs$pred_level)
+  
+  
+  class(full_rhs) <- c("data.frame", class(model))
+  full_rhs
+}
+
+#' Extract right-hand side of an forecast::Arima object
+#'
+#' Extract a dataframe of S/MA components
+#'
+#' @keywords internal
+#'
+#' @inheritParams extract_eq
+#'
+#' @return A dataframe
+#' @noRd
+extract_rhs.forecast_ARIMA <- function(model, ...) {
+  # RHS of ARIMA is the Moving Averageside
+  # Consists of a Non-Seasonal MA (p), Seasonal MA (P), Seasonal Differencing.
+  
+  # This is more than needed, but we"re being explicit for readability.
+  # Orders stucture in Arima model:
+  # c(p, q, P, Q, m, d, D)
+  ords <- model$arma
+  names(ords) <- c("p","q","P","Q","m","d","D")
+  
+  # Following the rest of the package.
+  # Pull the full model with broom::tidy
+  full_mdl <- broom::tidy(model)
+  
+  # Filter down to only the MA terms and seasonal drift
+  full_rhs <- full_mdl[grepl("^s?ma", full_mdl$term), ]
+  
+  # Add a Primary column and set it to the backshift operator.
+  full_rhs$primary <- "B"
+  
+  # Get the superscript for the backshift operator.
+  ## This is equal to the number on the term for MA
+  ## and the number on the term * the seasonal frequency for SMA.
+  ## Powers of 1 are replaced with an empty string.
+  rhs_super <- as.numeric(gsub("^s?ma", "", full_rhs$term))
+  rhs_super[grepl("^sma", full_rhs$term)] <- rhs_super[grepl("^sma", full_rhs$term)] * ords["m"]
+  
+  rhs_super <- as.character(rhs_super)
+  
+  full_rhs$superscript <- rhs_super
+  
+  # The RHS has only seasonal differencing.
+  # This is similar to the RHS, but here we only have 1 element.
+  # So we"ll use an if statement instead of vectorized filters.
+  if(ords["D"] > 0){
+    # Then there is a seasonal difference.
+    diff_df <- data.frame(term = "zz_seas_Differencing",
+                          estimate = NA,
+                          std.error = NA,
+                          primary = paste0("(1+B", "^{", ords["m"],"})"),
+                          superscript = ords["D"])
+    
+    # Add the differencing lines to the end of the S/MA lines.
+    full_rhs <- rbind(full_rhs, diff_df)
+  }
+  
+  # Reduce any "1" superscripts to not show the superscript
+  full_rhs[full_rhs$superscript == "1", "superscript"] <- ""
+  
+  # Set subscripts so that create_term works later
+  full_rhs$subscripts <- ""
+  
+  # Set the class
+  class(full_rhs) <- c(class(model), "data.frame")
+  
+  # Explicit return
+  return(full_rhs)
+}
+
+
+order_interaction <- function(interaction_term) {
+  if(grepl("^cor__", interaction_term)) {
+    ran_part <- gsub("(.+\\.).+", "\\1", interaction_term)
+    interaction_term <- gsub(ran_part, "", interaction_term, fixed = TRUE)
+  } else if (grepl("^sd__", interaction_term)){
+    ran_part <- "sd__"
+    interaction_term <- gsub(paste0("^", ran_part), "", interaction_term)
+  }
+  terms <- strsplit(interaction_term, ":")[[1]]
+  terms_ordered <- sort(terms)
+  out <- paste0(terms_ordered, collapse = ":")
+  
+  if(exists("ran_part")) {
+    # check/handle if there's an interaction in the random part
+    # sd or cor
+    type <- gsub("(^.+__).+", "\\1", ran_part)
+    
+    # remove type and period at end
+    ran <- gsub(type, "", ran_part)
+    ran <- gsub("\\.$", "", ran)
+    
+    # handle interaction (if present)
+    ran <- strsplit(ran, ":")[[1]]
+    ran <- paste0(sort(ran), collapse = ":")
+    
+    # paste it all back together
+    if(grepl("^cor", ran_part)) {
+      out <- paste0(type, ran, ".", out)
+    } else {
+      out <- paste0(type, ran, out)
+    }
+  }
+  out
+}
+
+recode_groups <- function(rhs) {
+  
+  rhs_splt <- split(rhs, rhs$group)
+  rhs_splt <- rhs_splt[!grepl("Residual", names(rhs_splt))]
+  
+  names_collapsed <- collapse_groups(names(rhs_splt))
+  
+  intercept_vary <- vapply(rhs_splt, function(x) {
+    any(grepl("sd__(Intercept)", x$term, fixed = TRUE))
+  }, FUN.VALUE = logical(1))
+  
+  check <- split(intercept_vary, names_collapsed)
+  
+  # collapse these groups
+  collapse <- vapply(check, all, FUN.VALUE = logical(1))
+  
+  collapse_term <- function(term, v) {
+    ifelse(grepl(term, v), collapse_groups(v), v)
+  }
+  
+  out <- rhs$group
+  for(i in seq_along(collapse[!collapse])) {
+    out <- collapse_term(names(collapse[!collapse])[i], out)  
+  }
+  out
+}
+
+collapse_groups <- function(group) {
+  gsub("(.+)\\.\\d\\d?$", "\\1", group)
+}
+
+order_split <- function(split, pred_level) {
+  if(length(pred_level) == 0) {
+    return(pred_level)
+  }
+  var_order <- vapply(names(pred_level), function(x) {
+    exact <- split %in% x
+    detect <- grepl(x, split)
+    
+    # take exact if it's there, if not take detect
+    if(any(exact)) {
+      out <- exact
+    } else {
+      out <- detect
+    }
+    
+    seq_along(out)[out]
+  }, FUN.VALUE = integer(1))
+  
+  split[var_order]
+}
+
+#' Pull just the random variables
+#' @param rhs output from \code{extract_rhs}
+#' @keywords internal
+#' @noRd
+extract_random_vars <- function(rhs) {
+  order <- rhs[rhs$group != "Residual", ]
+  order <- sort(tapply(order$original_order, order$group, min))
+  
+  vc <- rhs[rhs$group != "Residual" & rhs$effect == "ran_pars", ]
+  splt <- split(vc, vc$group)[names(order)]
+  
+  lapply(splt, function(x) {
+    vars <- x[!grepl("cor__", x$term), ]
+    gsub("sd__(.+)", "\\1", vars$term)
+  })
+}
+
+
+detect_crosslevel <- function(primary, pred_level) {
+  mapply_lgl(function(prim, predlev) {
+    if (length(prim) > 1) {
+      if (length(prim) != length(predlev)) {
+        TRUE
+      } else if (length(unique(predlev)) != 1) {
+        TRUE
+      } else {
+        FALSE
+      }
+    } else {
+      FALSE
+    }
+  },
+  prim = primary, 
+  predlev = pred_level)
+}
+
+#### Consider refactoring the below too
+detect_covar_level <- function(predictor, group) {
+  nm <- names(group)
+  v <- paste(predictor, group[ ,1], sep = " _|_ ")
+  unique_v <- unique(v)
+  test <- gsub(".+\\s\\_\\|\\_\\s(.+)", "\\1", unique_v)
+  
+  if(all(!duplicated(test))) {
+    return(nm)
+  }
+}
+
+detect_X_level <- function(X, group) {
+  lapply(X, detect_covar_level, group)
+}
+
+collapse_list <- function(x, y) {
+  null_x <- vapply(x, function(x) {
+    if(any(is.null(x))) {
+      return(is.null(x))
+    } else return(is.na(x))
+  }, FUN.VALUE = logical(1))
+  
+  null_y <- vapply(y, function(x) {
+    if(any(is.null(x))) {
+      return(is.null(x))
+    } else return(is.na(x))
+  }, FUN.VALUE = logical(1))
+  
+  y[null_x & !null_y] <- y[null_x & !null_y]
+  y[!null_x & null_y] <- x[!null_x & null_y]
+  y[!null_x & !null_y] <- x[!null_x & !null_y]
+  
+  unlist(lapply(y, function(x) ifelse(is.null(x), NA_character_, x)))
+}
+
+detect_group_coef <- function(model, rhs) {
+  outcome <- all.vars(formula(model))[1]
+  d <- model@frame
+  
+  random_lev_names <- names(extract_random_vars(rhs))
+  random_levs <- unlist(strsplit(random_lev_names, ":"))
+  random_levs <- gsub("^\\(|\\)$", "", random_levs)
+  random_levs <- unique(collapse_groups(random_levs))
+  
+  random_lev_ids <- d[random_levs]
+  ranef_order <- vapply(random_lev_ids, function(x) {
+    length(unique(x)) 
+  }, FUN.VALUE = numeric(1))
+  ranef_order <- rev(sort(ranef_order))
+  random_lev_ids <- random_lev_ids[ ,names(ranef_order), drop = FALSE]
+  
+  X <- d[!(names(d) %in% c(random_levs, outcome))]
+  
+  lev_assign <- vector("list", length(random_levs))
+  for(i in seq_along(random_lev_ids)) {
+    lev_assign[[i]] <- detect_X_level(X, random_lev_ids[ , i, drop = FALSE])
+  }
+  
+  levs <- Reduce(collapse_list, rev(lev_assign))
+  
+  # reassign acutal names (in cases where ranef contains ":")
+  out <- random_lev_names[match(levs, random_levs)]
+  names(out) <- names(levs)
+  
+  unlist(out[!is.na(out)])
+}
+
+
+
+
+
 
 
 #' Extract the primary terms from all terms
@@ -129,11 +486,15 @@ extract_primary_term <- function(primary_term_v, all_terms) {
 #' @noRd
 
 detect_primary <- function(full_term, primary_term_v) {
-  vapply(primary_term_v, function(indiv_term) {
-    grepl(indiv_term, full_term, fixed = TRUE)
-  },
-  logical(1)
-  )
+  if(full_term %in% primary_term_v) {
+    primary_term_v %in% full_term
+  } else {
+    vapply(primary_term_v, function(indiv_term) {
+      grepl(indiv_term, full_term, fixed = TRUE)
+    },
+    logical(1)
+    ) 
+  }
 }
 
 

@@ -2,14 +2,13 @@
 library(equatiomatic)
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>",
-  results = "asis"
+  comment = "#>"
 )
 
 ## ---- warning = FALSE, results = 'markup'-------------------------------------
 lm(bill_length_mm ~ bill_depth_mm, penguins)
 
-## ---- echo = FALSE, results = "asis"------------------------------------------
+## ---- echo = FALSE------------------------------------------------------------
 library(equatiomatic)
 extract_eq(lm(bill_length_mm ~ bill_depth_mm, penguins))
 
@@ -19,10 +18,10 @@ library(equatiomatic)
 # fit a basic multiple linear regression model
 m <- lm(bill_length_mm ~ bill_depth_mm + flipper_length_mm, penguins)
 
-## ----extract_eq1, results = 'markup'------------------------------------------
+## ----extract_eq1--------------------------------------------------------------
 extract_eq(m)
 
-## ----extract_eq1-no-echo, results = "asis", echo = FALSE----------------------
+## ----extract_eq1-no-echo, echo = FALSE----------------------------------------
 extract_eq(m)
 
 ## ----eq2----------------------------------------------------------------------
@@ -55,12 +54,16 @@ supported <- data.frame(
             "logistic regression",
             "probit regression",
             "ordinal logistic regression",
-            "ordinal probit regression"),
+            "ordinal probit regression",
+            "auto-regressive integrated moving average",
+            "regression with auto-regressive integrated moving average errors"),
   packages = c("`stats::lm`",
                "`stats::glm(family = binomial(link = 'logit'))`",
                "`stats::glm(family = binomial(link = 'probit'))`",
                "`MASS::polr(method = 'logistic')`; `ordinal::clm(link = 'logit')`",
-               "`MASS::polr(method = 'probit')`; `ordinal::clm(link = 'probit')`")
+               "`MASS::polr(method = 'probit')`; `ordinal::clm(link = 'probit')`",
+               "`forecast::Arima`",
+               "`forecast::Arima`")
   )
 
 knitr::kable(supported, col.names = c("Model", "Packages/Functions"))

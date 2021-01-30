@@ -40,6 +40,14 @@
 #'   coefficient estimates that are negative are preceded with a "+" (e.g.
 #'   `5(x) + -3(z)`). If enabled, the "+ -" is replaced with a "-" (e.g.
 #'   `5(x) - 3(z)`).
+#' @param mean_separate Currently only support for \code{\link[lme4]{lmer}}
+#'   models. Should the mean structure be inside or separated from the
+#'   normal distribution? Defaults to \code{NULL}, in which case it will become
+#'   \code{TRUE} if there are more than three fixed-effect parameters. If
+#'   \code{TRUE}, the equation will be displayed as, for example,
+#'   outcome ~ N(mu, sigma); mu = alpha + beta_1(wave). If \code{FALSE}, this
+#'   same equation would be outcome ~ N(alpha + beta, sigma).
+#' @param ... Additional arguments (for future development; not currently used).
 #' @export
 #'
 #' @return A character of class \dQuote{equation}.
@@ -96,18 +104,34 @@ extract_eq <- function(model, intercept = "alpha", greek = "beta",
                        show_distribution = FALSE,
                        wrap = FALSE, terms_per_line = 4,
                        operator_location = "end", align_env = "aligned",
-                       use_coefs = FALSE, coef_digits = 2, fix_signs = TRUE) {
+                       use_coefs = FALSE, coef_digits = 2, fix_signs = TRUE,
+                       mean_separate,...) {
+  UseMethod("extract_eq", model)
+}
 
-  lhs <- extract_lhs(model, ital_vars, show_distribution)
+#' Default function for extracting an equation from a model object
+#'
+#' @keywords internal
+#' @export
+#' @noRd
+extract_eq.default <- function(model, intercept = "alpha", greek = "beta",
+                               raw_tex = FALSE, ital_vars = FALSE,
+                               show_distribution = FALSE,
+                               wrap = FALSE, terms_per_line = 4,
+                               operator_location = "end", align_env = "aligned",
+                               use_coefs = FALSE, coef_digits = 2,
+                               fix_signs = TRUE, mean_separate,...) {
+
+  lhs <- extract_lhs(model, ital_vars, show_distribution, use_coefs)
   rhs <- extract_rhs(model)
 
-  eq_raw <- create_eq(lhs,
+  eq_raw <- create_eq(model,
+                      lhs,
                       rhs,
                       ital_vars,
                       use_coefs,
                       coef_digits,
                       fix_signs,
-                      model,
                       intercept,
                       greek,
                       raw_tex)
@@ -173,5 +197,134 @@ extract_eq <- function(model, intercept = "alpha", greek = "beta",
 
   class(eq) <- c('equation', 'character')
 
+  return(eq)
+}
+
+# These args still need to be incorporated
+# intercept, greek, raw_tex
+# I haven't incorporated wrap yet either and we should think about if we want to
+# It might be better to have an alternative for matrix notation
+
+#' Equation generator for lme4::lmer models
+#' @export
+#' @noRd
+extract_eq.lmerMod <- function(model, intercept = "alpha", greek = "beta",
+                               raw_tex = FALSE, ital_vars = FALSE,
+                               show_distribution = FALSE,
+                               wrap = FALSE, terms_per_line = 4,
+                               operator_location = "end",
+                               align_env = "aligned",
+                               use_coefs = FALSE, coef_digits = 2,
+                               fix_signs = TRUE, mean_separate = NULL, ...) {
+
+  l1 <- create_l1_merMod(model, mean_separate,
+                         ital_vars, wrap, terms_per_line,
+                         use_coefs, coef_digits, fix_signs,
+                         operator_location, sigma = "\\sigma^2")
+  vcv <- create_ranef_structure_merMod(model, ital_vars, use_coefs, coef_digits,
+                                       fix_signs)
+  
+  if(grepl("^\n    \n", vcv[[1]])) {
+    vcv <- gsub("^\n(.+)", "\\1", vcv)
+  }
+  
+  eq <- paste(c(l1, vcv), collapse = " \\\\")
+  eq <- gsub("\\sim", " &\\sim", eq, fixed = TRUE)
+  eq <- paste(eq, collapse = " \\\\ \n")
+  eq <- paste0("\\begin{", align_env, "}\n",
+               paste0("  ", eq),
+               "\n\\end{", align_env, "}")
+  class(eq) <- c('equation', 'character')
+
+  eq
+}
+
+#' Equation generator for forecast::Arima
+#' @export
+#' @noRd
+extract_eq.forecast_ARIMA <- function(model, intercept = "alpha", greek = "beta",
+                                      raw_tex = FALSE, ital_vars = FALSE,
+                                      show_distribution = FALSE,
+                                      wrap = FALSE, terms_per_line = 4,
+                                      operator_location = "end", align_env = "aligned",
+                                      use_coefs = FALSE, coef_digits = 2,
+                                      fix_signs = TRUE, mean_separate,...) {
+  
+  # Determine if we are working on Regerssion w/ Arima Errors
+  regression <- helper_arima_is_regression(model)
+  
+  # Get each of the sides
+  lhs <- extract_lhs(model)
+  rhs <- extract_rhs(model)
+  
+  if(regression){
+    yt <- helper_arima_extract_lm(model)
+  } else {
+    yt <- NULL
+  }
+
+  # Extract the equation lists
+  eq <- create_eq(model,
+                  lhs,
+                  rhs,
+                  yt,
+                  ital_vars,
+                  use_coefs,
+                  coef_digits,
+                  raw_tex)
+  
+  ##########
+  # Wrapping has not been included due to the 
+  # Multiline nature of Regression w/ ARIMA errors
+  ##########
+  
+  ##########
+  # Fix signs is done automatically
+  # This is necessary so that the Lag/Backshift equations will make sense.
+  #########
+  
+  # Collapse down terms.
+  eq <- lapply(eq, function(x){
+    lhs <- paste(x$lhs[[1]], collapse = " ")
+    rhs <-paste(x$rhs[[1]], collapse = " ")
+    rhs <- gsub("^\\+", "", rhs)
+    
+    # Alignment, if needed, will be added later.
+    paste(lhs, rhs, sep = " = ")
+  })
+  
+  # If regression w/ arima errors.
+  if(regression){
+    # Add alignment to the regression function
+    eq$lm_eq <- paste0("&\\text{let}\\quad &&", eq$lm_eq)
+    
+    # Add alignment and "where" to ARIMA line
+    # Need to re-split the terms. This is redundant, but makes for less repeated code.
+    # Ensure it is seen as a character vector first and foremost. 
+    prep_split <- as.character(eq$arima_eq)
+    split_arima <- strsplit(eq$arima_eq, "=")[[1]]
+    names(split_arima) <- c("ar", "ma")
+    
+    split_arima["ar"] <- paste0("&\\text{where}\\quad  &&", split_arima["ar"])
+    split_arima["ma"] <- paste0("& &&=", split_arima["ma"])
+    
+    eq$arima_eq <- paste(split_arima, collapse = " \\\\\n")
+    
+    # Add line (always the same) indicating the distribution of the residual.
+    eq$err_dist <- "&\\text{where}\\quad &&\\varepsilon_{t} \\sim{WN(0, \\sigma^{2})}"
+    
+    # Add alignment to the equation structure.
+    eq <- paste0("\\begin{alignat}{2}\n",
+                 paste(eq, collapse = " \\\\\n"),
+                 "\n\\end{alignat}")
+  } else {
+    # If arima only then we only need 1 line and no alignment.
+    eq <- eq$arima_eq
+  }
+  
+  # Set the class
+  class(eq) <- c("equation", "character")
+  
+  # Explicit return
   return(eq)
 }

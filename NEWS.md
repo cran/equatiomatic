@@ -1,3 +1,13 @@
+# equatiomatic 0.2.0
+* **New models**: This is the first version to support `lme4::lmer()` models and `forecast::Arima()` models. 
+* New vignettes for each of the new models supported.
+* New vignette showing how to use the package with plotting
+* Switched the testing framework to use snapshot testing
+* Uses new print method so users no longer have to specify `results = "asis"` in the R Markdown chunk option
+* Fixed error in rendering logistic/probit regression equations by removing the epsilon (error term) at the end of the left-hand side
+* The epsilon (error term) is no longer shown when rendering the fitted model equation, i.e. `use_coefs = TRUE`, for `lm` models. The hat sign is also added to the response variable. 
+
+
 # equatiomatic 0.1.0
 * Initial CRAN Release
 * Extracts equations for `lm` models
