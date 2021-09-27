@@ -8,8 +8,16 @@ extract_eq(
   model,
   intercept = "alpha",
   greek = "beta",
+  greek_colors = NULL,
+  subscript_colors = NULL,
+  var_colors = NULL,
+  var_subscript_colors = NULL,
   raw_tex = FALSE,
+  swap_var_names = NULL,
+  swap_subscript_names = NULL,
   ital_vars = FALSE,
+  label = NULL,
+  index_factors = FALSE,
   show_distribution = FALSE,
   wrap = FALSE,
   terms_per_line = 4,
@@ -18,7 +26,9 @@ extract_eq(
   use_coefs = FALSE,
   coef_digits = 2,
   fix_signs = TRUE,
+  font_size = NULL,
   mean_separate,
+  return_variances = FALSE,
   ...
 )
 }
@@ -34,11 +44,53 @@ coefficients? Currently only accepts \code{"beta"} (with plans for future
 development). Can be used in combination with \code{raw_tex} to use any
 notation, e.g., \code{"\\hat{\\beta}"}.}
 
+\item{greek_colors}{The colors of the greek notation in the equation. Must
+be a single color (named or HTML hex code) or a vector of colors (which
+will be recycled if smaller than the number of terms in the model). When
+rendering to PDF, I suggest using HTML hex codes, as not all named colors
+are recognized by LaTeX, but equatiomatic will internally create the
+color definitions for you if HTML codes are supplied. Note that this is
+not yet implemented for mixed effects models (lme4).}
+
+\item{subscript_colors}{The colors of the subscripts for the greek notation.
+The argument structure is equivalent to \code{greek_colors} (i.e., see
+above for more detail).}
+
+\item{var_colors}{The color of the variable names. This takes a named vector
+of the form \code{c("variable" = "color")}. For example
+\code{c("bill_length_mm" = "#00d4fa", "island" = "#00fa85")}. Colors can
+be names (e.g., \code{"red"}) or HTML hex codes, as shown in the example.}
+
+\item{var_subscript_colors}{The colors of the factor subscripts for
+categorical variables. The interface for this is equivalent to
+\code{var_colors}, and all subscripts for a given variable will be
+displayed in the provided color. For example, the code
+\code{c("island" = "green")} would result in the subscripts for "Dream"
+and "Torgersen" being green (assuming "Biscoe" was the reference group).}
+
 \item{raw_tex}{Logical. Is the greek code being passed to denote coefficients
 raw tex code?}
 
+\item{swap_var_names}{A vector of the form c("old_var_name" = "new name").
+For example: c("bill_length_mm" = "Bill Length (MM)").}
+
+\item{swap_subscript_names}{A vector of the form
+c("old_subscript_name" = "new name"). For example:
+c("f" = "Female").}
+
 \item{ital_vars}{Logical, defaults to \code{FALSE}. Should the variable names
 not be wrapped in the \code{\\operatorname{}} command?}
+
+\item{label}{A label for the equation, which can then be used for in-text
+references. See example \href{https://www.overleaf.com/learn/latex/Cross_referencing_sections,_equations_and_floats#Referencing_equations.2C_figures_and_tables}{here}.
+Note that this \strong{only works for PDF output}. The in-text references also
+must match the label exactly, and must be formatted as
+\code{\\ref{eq: label}}, where \code{label} is a place holder for the
+specific label. Notice the space after the colon before the label. This
+also must be there, or the cross-reference will fail.}
+
+\item{index_factors}{Logical, defaults to \code{FALSE}. Should the factors
+be indexed, rather than using subscripts to display all levels?}
 
 \item{show_distribution}{Logical. When fitting a logistic or probit
 regression, should the binomial distribution be displayed? Defaults to
@@ -72,6 +124,10 @@ coefficient estimates that are negative are preceded with a "+" (e.g.
 \code{5(x) + -3(z)}). If enabled, the "+ -" is replaced with a "-" (e.g.
 \code{5(x) - 3(z)}).}
 
+\item{font_size}{The font size of the equation. Defaults to default of
+the output format. Takes any of the standard LaTeX arguments (see
+\href{https://www.overleaf.com/learn/latex/Font_sizes,_families,_and_styles#Font_styles}{here}).}
+
 \item{mean_separate}{Currently only support for \code{\link[lme4]{lmer}}
 models. Should the mean structure be inside or separated from the
 normal distribution? Defaults to \code{NULL}, in which case it will become
@@ -80,12 +136,20 @@ normal distribution? Defaults to \code{NULL}, in which case it will become
 outcome ~ N(mu, sigma); mu = alpha + beta_1(wave). If \code{FALSE}, this
 same equation would be outcome ~ N(alpha + beta, sigma).}
 
+\item{return_variances}{Logical. When \code{use_coefs = TRUE} with a mixed
+effects model (e.g., \code{lme4::lmer()}), should the variances and
+co-variances be returned? If \code{FALSE} (the default) standard deviations
+and correlations are returned instead.}
+
 \item{...}{Additional arguments (for future development; not currently used).}
 }
 \value{
 A character of class \dQuote{equation}.
 }
 \description{
+\Sexpr[results=rd, stage=render]{rlang:::lifecycle("maturing")}
+}
+\details{
 Extract the variable names from a model to produce a 'LaTeX' equation, which is
 output to the screen. Supports any model supported by
 \link[broom:reexports]{broom::tidy}.
@@ -104,11 +168,13 @@ mod3 <- lm(body_mass_g ~ bill_length_mm + species, penguins)
 extract_eq(mod3)
 
 set.seed(8675309)
-d <- data.frame(cat1 = rep(letters[1:3], 100),
-                cat2 = rep(LETTERS[1:3], each = 100),
-                cont1 = rnorm(300, 100, 1),
-                cont2 = rnorm(300, 50, 5),
-                out   = rnorm(300, 10, 0.5))
+d <- data.frame(
+  cat1 = rep(letters[1:3], 100),
+  cat2 = rep(LETTERS[1:3], each = 100),
+  cont1 = rnorm(300, 100, 1),
+  cont2 = rnorm(300, 50, 5),
+  out = rnorm(300, 10, 0.5)
+)
 mod4 <- lm(out ~ ., d)
 extract_eq(mod4)
 
@@ -127,13 +193,18 @@ extract_eq(mod2, wrap = TRUE, terms_per_line = 2, use_coefs = TRUE)
 # Don't fix doubled-up "+ -" signs
 extract_eq(mod2, wrap = TRUE, terms_per_line = 4, use_coefs = TRUE, fix_signs = FALSE)
 
+# Use indices for factors instead of subscripts
+extract_eq(mod2, wrap = TRUE, terms_per_line = 4, index_factors = TRUE)
+
 # Use other model types, like glm
 set.seed(8675309)
-d <- data.frame(out = sample(0:1, 100, replace = TRUE),
-                cat1 = rep(letters[1:3], 100),
-                cat2 = rep(LETTERS[1:3], each = 100),
-                cont1 = rnorm(300, 100, 1),
-                cont2 = rnorm(300, 50, 5))
+d <- data.frame(
+  out = sample(0:1, 100, replace = TRUE),
+  cat1 = rep(letters[1:3], 100),
+  cat2 = rep(LETTERS[1:3], each = 100),
+  cont1 = rnorm(300, 100, 1),
+  cont2 = rnorm(300, 50, 5)
+)
 mod5 <- glm(out ~ ., data = d, family = binomial(link = "logit"))
 extract_eq(mod5, wrap = TRUE)
 }

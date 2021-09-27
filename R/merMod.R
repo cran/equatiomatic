@@ -1,13 +1,3 @@
-#' Utility function to wrap things as normally distributed
-#' @keywords internal
-#' @param mean The LaTeX code that should go into the mean part
-#' @param sigma The LaTeX code that should go into the variance part.
-#'   Defaults to sigma squared
-#' @noRd
-wrap_normal_dist <- function(mean, sigma = "\\sigma^2") {
-  paste0("N \\left(", mean, ", ", sigma, " \\right)")
-}
-
 #' Provides the order of the levels
 #' @param rhs_random output from \code{extract_rhs.lmerMod}, subset as 
 #' \code{rhs[rhs$effect == "ran_pars", ]}.
@@ -23,14 +13,14 @@ vary_higher_subscripts <- function(term, rhs_random, lev_omit = NULL) {
   order <- get_order(rhs_random)
   splt_random <- splt_random[names(order)]
   
-  if(!is.null(lev_omit)) {
+  if (!is.null(lev_omit)) {
     lev_indexes <- lev_indexes[-seq_along(grep(lev_omit, names(splt_random)))]
     splt_random <- splt_random[-seq_along(grep(lev_omit, names(splt_random)))]
   }
   
   out <- rep(NA_character_, length(lev_indexes))
-  for(i in seq_along(splt_random)) {
-    if(any(grepl(term, splt_random[[i]]$term))) {
+  for (i in seq_along(splt_random)) {
+    if (any(grepl(term, splt_random[[i]]$term))) {
       out[i] <- paste0(lev_indexes[i], "[i]")
     }
   }
@@ -73,12 +63,10 @@ pull_term_subscript <- function(greek_coef, n = 1) {
 pull_min_level <- function(one_crossdata, one_detected, one_lev, one_var, 
                            order) {
   all_vars <- mapply_chr(function(lev, var) {
-    # d <- one_crossdata[one_detected]
-    # d <- d[[lev]]
     d <- one_crossdata[[lev]]
     
     out <- d[d$term == var, ]$greek
-    if(length(out) == 0) {
+    if (length(out) == 0) {
       return("")
     }
     out
@@ -102,7 +90,7 @@ pull_superscript <- function(slp_preds, detect_cross, cross_data, order) {
     pull_min_level(cd, detected, lev, var, order)
   }, cross_data, detect_cross, levs, vars)
   
-  superscripts <- if(length(ss) == 0) {
+  superscripts <- if (length(ss) == 0) {
     ""
   } else {
     ifelse(is.na(ss), "", ss)
@@ -122,15 +110,13 @@ pull_superscript <- function(slp_preds, detect_cross, cross_data, order) {
 #' @noRd
 assign_l1_greek <- function(rhs_fixed, rhs_random) {
   beta_indices <- seq_along(rhs_fixed$l1[rhs_fixed$l1])
-  if(any(rhs_fixed$term != "(Intercept)" & rhs_fixed$l1)) {
-    beta_indices <- beta_indices - 1
+  if (any(rhs_fixed$term == "(Intercept)" & rhs_fixed$l1)) {
+    beta_indices <- beta_indices[-length(beta_indices)]
   }
-  l1 <- ifelse(rhs_fixed$term == "(Intercept)" & rhs_fixed$l1,
-               "\\alpha_{",
-               ifelse(rhs_fixed$term != "(Intercept)" & rhs_fixed$l1,
-                      paste0("\\beta_{", beta_indices),
-                      NA_character_)
-  )
+  l1 <- rep(NA_character_, length(rhs_fixed$term))
+  l1[rhs_fixed$term == "(Intercept)" & rhs_fixed$l1] <- "\\alpha_{"
+  l1[rhs_fixed$term != "(Intercept)" & rhs_fixed$l1] <- paste0("\\beta_{", beta_indices)
+  
   terms <- rhs_fixed$term[!is.na(l1)]
   
   ss <- vapply(terms, function(x) vary_higher_subscripts(x, rhs_random),
@@ -153,7 +139,7 @@ assign_l1_greek <- function(rhs_fixed, rhs_random) {
 #'   \code{greek} column filled in
 #' @noRd
 assign_higher_levels <- function(lev_data, lev_data_name, splt, rhs_random) {
-  if(is.null(lev_data)) {
+  if (is.null(lev_data)) {
     return()
   }
   split_terms <- split(lev_data, lev_data$crosslevel)
@@ -166,7 +152,7 @@ assign_higher_levels <- function(lev_data, lev_data_name, splt, rhs_random) {
   
   # Cross-level interactions
   slp_preds <- split_terms$`TRUE`
-  if(is.null(slp_preds)) {
+  if (is.null(slp_preds)) {
     return(int_preds)
   }
   
@@ -175,7 +161,7 @@ assign_higher_levels <- function(lev_data, lev_data_name, splt, rhs_random) {
   })
   
   cross_data <- Map(function(pred_levs, cross_detected) {
-    splt[ pred_levs[cross_detected] ]
+    splt[pred_levs[cross_detected]]
   },
   slp_preds$pred_level,
   detect_cross)
@@ -204,8 +190,8 @@ assign_higher_levels <- function(lev_data, lev_data_name, splt, rhs_random) {
 #'   at), and a new \code{predsplit} column that allows this data frame
 #'   to be split by the level at which the variable predicts.
 #' @noRd
-create_fixef_greek_merMod <- function(model) {
-  rhs <- extract_rhs(model)
+create_fixef_greek_merMod <- function(model, return_variances) {
+  rhs <- extract_rhs(model, return_variances)
   rhs_fixed <- rhs[rhs$effect == "fixed", ]
   rhs_random <- rhs[rhs$effect == "ran_pars", ]
   rhs_random <- rhs_random[rhs_random$group != "Residual", ]
@@ -219,7 +205,7 @@ create_fixef_greek_merMod <- function(model) {
   splt <- split(rhs_fixed, rhs_fixed$predsplit)[c("l1", names(order))]
   splt <- splt[!vapply(splt, is.null, FUN.VALUE = logical(1))]
   
-  for(i in seq_along(splt)[-1]) {
+  for (i in seq_along(splt)[-1]) {
     splt[[i]] <- assign_higher_levels(splt[[i]], names(splt)[i], splt, rhs_random) 
   }
   
@@ -227,7 +213,7 @@ create_fixef_greek_merMod <- function(model) {
 }
 
 pull_cross_var <- function(cross_splt_frame, order) {
-  if(nrow(cross_splt_frame) == 0) {
+  if (nrow(cross_splt_frame) == 0) {
     return()
   }
   interaction_terms <- strsplit(cross_splt_frame$term, ":")
@@ -247,7 +233,7 @@ pull_cross_var <- function(cross_splt_frame, order) {
   unique(term)
 }
 
-remove_crosslevel_interaction_redundancy <- function(model, lev_data, term) {
+rm_crosslev_int_redundancy <- function(model, lev_data, term) {
   formula_rhs <- labels(terms(formula(model)))
   formula_rhs <- formula_rhs[!grepl(":|\\|", formula_rhs)]
   terms <- vapply(term, function(x) {
@@ -258,7 +244,7 @@ remove_crosslevel_interaction_redundancy <- function(model, lev_data, term) {
     exact <- x %in% paste0(terms, collapse = "|")
     detected <- grepl(paste0(terms, collapse = "|"), x)
     
-    if(any(exact)) {
+    if (any(exact)) {
       !exact
     } else {
       !detected
@@ -289,7 +275,7 @@ pull_intercept <- function(splt_lev_fixed, splt_lev_random, order,
 
   int <- "\\alpha"
 
-  if(is.null(splt_lev_fixed)) {
+  if (is.null(splt_lev_fixed)) {
     return()
   }
   
@@ -311,19 +297,20 @@ pull_intercept <- function(splt_lev_fixed, splt_lev_random, order,
   # add alpha superscript
   nocross$greek <- paste0(nocross$greek, paste0("^{", int, "}"))
   
-  if(use_coefs) {
+  if (use_coefs) {
     coef_terms <- paste0(round(nocross$estimate, coef_digits), 
                          "_{", nocross$greek, "}",  
                          nocross$terms)
-    if(length(coef_terms) == 0) {
+    if (length(coef_terms) == 0) {
       coef_terms <- 0
     }
     coef_terms <- paste0(coef_terms, collapse = " + ")
-    if(fix_signs) {
+    if (fix_signs) {
       coef_terms <- fix_coef_signs(coef_terms)
     }
     out <- data.frame(term = "(Intercept)", 
-                      greek = coef_terms)
+                      greek = coef_terms,
+                      stringsAsFactors = FALSE)
   } else {
     coef_terms <- paste0(nocross$greek, nocross$terms)
     # add intercept term
@@ -331,7 +318,7 @@ pull_intercept <- function(splt_lev_fixed, splt_lev_random, order,
     out <- data.frame(term = "(Intercept)", 
                       greek = paste0(coef_terms, collapse = " + "),
                       stringsAsFactors = FALSE)
-    if(nrow(out) == 0) {
+    if (nrow(out) == 0) {
       return()
     }
   }
@@ -347,11 +334,11 @@ create_slope_intercept <- function(term) {
   gsub("(.+)(.{1})(\\}$)", "\\10\\3", term)
 }
 
-# splt_lev_fixed <- splt_fixed[[1]]
-# splt_lev_random <- splt_rand[[1]]
 pull_slopes <- function(model, splt_lev_fixed, splt_lev_random, ital_vars,
-                        order, use_coefs, coef_digits, fix_signs) {
-  if(is.null(splt_lev_fixed)) {
+                        order, use_coefs, coef_digits, fix_signs,
+                        swap_var_names, swap_subscript_names,
+                        var_colors, var_subscript_colors) {
+  if (is.null(splt_lev_fixed)) {
     return()
   }
   
@@ -371,15 +358,17 @@ pull_slopes <- function(model, splt_lev_fixed, splt_lev_random, ital_vars,
   
   # remove that variable from interaction so there's no redundancies
   cross_splt <- Map(function(cross, terms) {
-    remove_crosslevel_interaction_redundancy(model, cross, terms)
+    rm_crosslev_int_redundancy(model, cross, terms)
   }, cross_splt, terms_predicted)
   
   # recreate terms
   cross_splt <- lapply(cross_splt, function(x) {
-    x$terms <- create_term(x, ital_vars)
+    x$terms <- create_term(x, ital_vars, swap_var_names, 
+                           swap_subscript_names,
+                           var_colors, var_subscript_colors)
     
     x$terms <- vapply(x$terms, function(x) {
-      if(nchar(x) == 0) {
+      if (nchar(x) == 0) {
         return("")
       }
       paste0("(", x, ")")
@@ -387,13 +376,13 @@ pull_slopes <- function(model, splt_lev_fixed, splt_lev_random, ital_vars,
     x
   })
   
-  if(use_coefs) {
+  if (use_coefs) {
     final_slopes <- lapply(cross_splt, function(x) {
       slopes <- paste0(round(x$estimate, coef_digits),
                        "_{",
                        #gsub("(^.+)\\^\\{.+\\}\\}(.+)", 
                         #    "\\1\\2", 
-                            cross_splt[[1]]$greek,#),
+                        cross_splt[[1]]$greek, #),
                        "}",
                        x$terms)
       paste0(slopes, collapse = " + ")
@@ -405,12 +394,13 @@ pull_slopes <- function(model, splt_lev_fixed, splt_lev_random, ital_vars,
       paste0(c(int, paste0(slopes, collapse = " + ")), collapse = " + ")
     })
   }
-  if(fix_signs) {
+  if (fix_signs) {
     final_slopes <- lapply(final_slopes, fix_coef_signs)
   }
   out <- data.frame(term = unlist(terms_predicted),
-                    greek = unlist(final_slopes))
-  if(nrow(out) == 0) {
+                    greek = unlist(final_slopes),
+                    stringsAsFactors = FALSE)
+  if (nrow(out) == 0) {
     return()
   }
   out
@@ -441,7 +431,9 @@ rbind_named <- function(l) {
 #' \code{greek_vary} is actually substituted in.
 #' @noRd
 create_means_merMod <- function(rhs, fixed_greek_mermod, model, ital_vars,
-                                use_coefs, coef_digits, fix_signs) {
+                                use_coefs, coef_digits, fix_signs,
+                                swap_var_names, swap_subscript_names,
+                                var_colors, var_subscript_colors) {
   rhs_random <- rhs[rhs$effect == "ran_pars", ]
   rhs_random <- rhs_random[rhs_random$group != "Residual" &
                              !grepl("^cor__", rhs_random$term), ]
@@ -449,10 +441,12 @@ create_means_merMod <- function(rhs, fixed_greek_mermod, model, ital_vars,
   
   order <- get_order(rhs_random)
   
-  fixed_greek_mermod$terms <- create_term(fixed_greek_mermod, ital_vars)
+  fixed_greek_mermod$terms <- create_term(fixed_greek_mermod, ital_vars,
+                                          swap_var_names, swap_subscript_names,
+                                          var_colors, var_subscript_colors)
   
   fixed_greek_mermod$terms <- vapply(fixed_greek_mermod$terms, function(x) {
-    if(nchar(x) == 0) {
+    if (nchar(x) == 0) {
       return("")
     }
     paste0("(", x, ")")
@@ -473,12 +467,14 @@ create_means_merMod <- function(rhs, fixed_greek_mermod, model, ital_vars,
   
   slopes <- Map(function(fixed, rand) {
     pull_slopes(model, fixed, rand, ital_vars, order, 
-                use_coefs, coef_digits, fix_signs)
+                use_coefs, coef_digits, fix_signs,
+                swap_var_names, swap_subscript_names,
+                var_colors, var_subscript_colors)
   }, splt_fixed, splt_rand)
   slopes <- rbind_named(slopes)
   
   int_slopes <- rbind(ints, slopes)
-  if(is.null(int_slopes)) {
+  if (is.null(int_slopes)) {
     out <- rhs_random
     out$greek <- NA_character_
     
@@ -488,11 +484,11 @@ create_means_merMod <- function(rhs, fixed_greek_mermod, model, ital_vars,
   }
   out <- out[order(out$original_order), c("group", "term", "greek", "original_order")]  
   random_vary <- fixed_greek_mermod[fixed_greek_mermod$term %in% unique(out$term), ]
-  random_vary$greek_vary <- gsub("(.+\\{\\d?).+", "\\1}", random_vary$greek)
+  random_vary$greek_vary <- gsub("(.+\\{\\d?\\d?\\d?).+", "\\1}", random_vary$greek)
   random_vary$new_order <- random_vary$original_order
   
   out <- merge(out, 
-               random_vary[ ,c("term", "greek_vary", "new_order")], 
+               random_vary[, c("term", "greek_vary", "new_order")], 
                by = "term", 
                all.x = TRUE)
   
@@ -504,7 +500,7 @@ create_means_merMod <- function(rhs, fixed_greek_mermod, model, ital_vars,
     paste0(gsub("(.+)\\}", "\\1", out$greek_vary), lev_indexes, "}")
   )
   
-  if(use_coefs) {
+  if (use_coefs) {
     out$greek <- ifelse(is.na(out$greek), 0, out$greek)
   } else {
     out$greek <- ifelse(is.na(out$greek), 
@@ -520,7 +516,7 @@ assign_vcov_greek <- function(rand_lev, means_merMod) {
     means_merMod$greek_vary[match(x, means_merMod$term)]
   })
   lapply(assign, function(x) {
-    if(length(x) == 1) {
+    if (length(x) == 1) {
       return(c(x, x))
     } else {
       x
@@ -547,10 +543,10 @@ create_greek_matrix <- function(v, mat, use_coefs, coef_digits, est) {
 }
 
 pull_var <- function(term) {
-  if(grepl("^cor__", term)) {
+  if (grepl("^cor__", term)) {
     ran_part <- gsub("(.+\\.).+", "\\1", term)
     term <- gsub(ran_part, "", term, fixed = TRUE)
-  } else if (grepl("^sd__", term)){
+  } else if (grepl("^sd__", term)) {
     ran_part <- "sd__"
     term <- gsub(paste0("^", ran_part), "", term)
   }
@@ -561,7 +557,7 @@ pull_var <- function(term) {
 create_vcov_merMod <- function(rhs_random_lev, means_merMod, 
                                use_coefs, coef_digits) {
 
-  rand_lev <- rhs_random_lev[ ,c("group", "term", "estimate")]
+  rand_lev <- rhs_random_lev[, c("group", "term", "estimate")]
   rand_lev$terms <- gsub("sd__|cor__", "", rand_lev$term)
   rand_lev$terms <- strsplit(rand_lev$terms, "\\.")
   
@@ -575,7 +571,7 @@ create_vcov_merMod <- function(rhs_random_lev, means_merMod,
   rand_lev$vcov_greek <- assign_vcov_greek(rand_lev, means)
   
   rand_lev$terms_var <- vapply(rand_lev$term, pull_var, FUN.VALUE = character(1))
-  rand_lev <- merge(rand_lev, means[ ,c("term", "new_order")], 
+  rand_lev <- merge(rand_lev, means[, c("term", "new_order")], 
                     by.x = "terms_var", 
                     by.y = "term", 
                     all.x = TRUE)
@@ -587,7 +583,7 @@ create_vcov_merMod <- function(rhs_random_lev, means_merMod,
   mat <- diag(sum(sd_rows))
   dimnames(mat) <- list(unique(unlist(rand_lev$vcov_greek[sd_rows])),
                         unique(unlist(rand_lev$vcov_greek[sd_rows])))
-  for(i in seq_along(rand_lev$vcov_greek)) {
+  for (i in seq_along(rand_lev$vcov_greek)) {
     mat <- create_greek_matrix(rand_lev$vcov_greek[[i]], mat, 
                                use_coefs, coef_digits, 
                                est = rand_lev$estimate[i])
@@ -596,16 +592,21 @@ create_vcov_merMod <- function(rhs_random_lev, means_merMod,
 }
 
 create_ranef_structure_merMod <- function(model, ital_vars, use_coefs,
-                                          coef_digits, fix_signs) {
-  rhs <- extract_rhs(model)
+                                          coef_digits, fix_signs, 
+                                          return_variances, swap_var_names, 
+                                          swap_subscript_names,
+                                          var_colors, var_subscript_colors) {
+  rhs <- extract_rhs(model, return_variances)
   rhs_random <- rhs[rhs$effect == "ran_pars", ]
   order <- get_order(rhs_random[rhs_random$group != "Residual", ])
   
-  fixed_greek_mermod <- create_fixef_greek_merMod(model)
+  fixed_greek_mermod <- create_fixef_greek_merMod(model, return_variances)
   means_merMod <- create_means_merMod(rhs, fixed_greek_mermod, 
                                       model, ital_vars,
                                       use_coefs, coef_digits, 
-                                      fix_signs)
+                                      fix_signs, swap_var_names, 
+                                      swap_subscript_names,
+                                      var_colors, var_subscript_colors)
   
   means_splt <- split(means_merMod, means_merMod$group)[names(order)]
   names(means_splt) <- names(order)
@@ -637,12 +638,11 @@ create_ranef_structure_merMod <- function(model, ital_vars, use_coefs,
 #' @noRd
 #' @examples \dontrun {
 #' equatiomatic:::create_onecol_array(c("\\alpha_{j}", "\\beta_{1j}"))
-# #> [1] "\\left(\n \\begin{array}{c} \\alpha_{j} \\\\ \\beta_{1j}
-#          \\end{array}\n \\right)"
+#'
 #' }
 #' # Note that the actual function does not return with the linebreak
 create_onecol_array <- function(v) {
-  if(length(v) == 1 | is.null(v)) {
+  if (length(v) == 1 | is.null(v)) {
     return(v)
   }
   v <- paste0("&", v)
@@ -665,14 +665,9 @@ create_onecol_array <- function(v) {
 #'               "\\sigma^2_{\\beta_{1j}"),
 #'             ncol = 2)
 #' equatiomatic:::convert_matrix(m)
-# #> [1] "\\left(\n \\begin{array}{cc}\\sigma^2_{\\alpha_{j}} &
-# #>                \\rho \\sigma_{\\alpha_{j}} \\sigma_{\\beta_{1j}} \\\\
-# #>                \\rho \\sigma_{\\beta_{1j}} \\sigma_{\\alpha_{j}} &
-# #>                \\sigma^2_{\\beta_{1j}\\end{array}\n \\right)"
 #' }
-#' # Note - actual output doesn't have line breaks
 convert_matrix <- function(mat) {
-  if(all(dim(mat) == c(1, 1))) {
+  if (all(dim(mat) == c(1, 1))) {
     return(mat)
   }
   cols <- paste(rep("c", ncol(mat)), collapse = "")
@@ -682,39 +677,27 @@ convert_matrix <- function(mat) {
   )
 }
 
-
-#' Create the full fixed-effects portion of an lmerMod
-#'
-#' @param model A fitted model from \code{\link[lme4]{lmer}}
-#' @param ital_vars Logical, defaults to \code{FALSE}. Should the variable
-#'   names not be wrapped in the \code{\\operatorname{}} command?
-#' @param sigma The error term. Defaults to "\\sigma^2".
-#' @keywords internal
-#' @noRd
-#' @examples \dontrun{
-#' library(lme4)
-#' fm1 <- lmer(Reaction ~ Days + (Days | Subject), sleepstudy)
-#' equatiomatic:::create_fixed_merMod(fm1, FALSE)
-# #> "\\operatorname{Reaction} \\sim N \\left(\\alpha_{j[i]} +
-# #>  \\beta_{1j[i]}(\\operatorname{Days}),\\sigma^2 \\right)"
-#' }
-create_l1_merMod <- function(model, mean_separate,
-                             ital_vars, wrap, terms_per_line,
-                             use_coefs, coef_digits, fix_signs,
-                             operator_location, sigma = "\\sigma^2") {
-  rhs <- extract_rhs(model)
-  lhs <- extract_lhs(model, ital_vars, use_coefs)
-  greek <- create_fixef_greek_merMod(model)
-  terms <- create_term(greek, ital_vars)
+create_l1_fixef <- function(model, ital_vars, use_coefs, coef_digits, 
+                            mean_separate, fix_signs, wrap, terms_per_line, 
+                            operator_location, return_variances, 
+                            swap_var_names, swap_subscript_names,
+                            var_colors, var_subscript_colors) {
+  rhs <- extract_rhs(model, return_variances)
+  lhs <- extract_lhs(model, ital_vars, use_coefs, swap_var_names, var_colors)
+  greek <- create_fixef_greek_merMod(model, return_variances)
+  terms <- create_term(greek, ital_vars, swap_var_names, 
+                       swap_subscript_names,
+                       var_colors, var_subscript_colors)
   
   terms <- vapply(terms, function(x) {
-    if(nchar(x) == 0) {
+    if (nchar(x) == 0) {
       return("")
     }
     paste0("(", x, ")")
   }, character(1))
   
-  if(use_coefs) {
+  if (use_coefs) {
+    sigma <- round(sigma(model), coef_digits)
     l1 <- paste0(
       round(greek$estimate[greek$predsplit == "l1"], coef_digits),
       "_{", greek$greek[greek$predsplit == "l1"], "}",
@@ -723,9 +706,13 @@ create_l1_merMod <- function(model, mean_separate,
   } else {
     l1 <- paste0(greek$greek[greek$predsplit == "l1"], 
                  terms[greek$predsplit == "l1"])
+    if(is_exposure_modeled(model)) {
+      offset <- get_offset(model, ital_vars)
+      l1 <- c(offset, l1)
+    }
   }
   
-  if(wrap) {
+  if (wrap) {
     if (operator_location == "start") {
       line_end <- "\\\\\n&\\quad + "
     } else {
@@ -733,36 +720,99 @@ create_l1_merMod <- function(model, mean_separate,
     }
     l1 <- split(l1, ceiling(seq_along(l1) / terms_per_line))
     
-    if(identical(mean_separate, FALSE)) {
+    if (identical(mean_separate, FALSE)) {
       l1 <- lapply(l1, function(x) {
         terms_added <- paste0(x, collapse = " + ")
         paste0("&", terms_added)
       })
       l1 <- paste0("\\begin{aligned}\n", paste0(l1, collapse = "\\\\"), "\n\\end{aligned}")
-      if(fix_signs) {
+      if (fix_signs) {
         l1 <- fix_coef_signs(l1)  
       }
     } else {
       l1 <- lapply(l1, paste0, collapse = " + ")
       l1 <- paste0(l1, collapse = line_end)
-      if(fix_signs) {
+      if (fix_signs) {
         l1 <- fix_coef_signs(l1)  
       }
     }
   } else {
     l1 <- paste0(l1, collapse = " + ")
-    if(fix_signs) {
+    if (fix_signs) {
       l1 <- fix_coef_signs(l1)  
     }
   }
+}
+
+create_l1 <- function(model, ...) {
+  UseMethod("create_l1", model)
+}
+
+#' Create the full fixed-effects portion of an lmerMod
+#'
+#' @param model A fitted model from \code{\link[lme4]{lmer}}
+#' @param ital_vars Logical, defaults to \code{FALSE}. Should the variable
+#'   names not be wrapped in the \code{\\operatorname{}} command?
+#' @param sigma The error term. Defaults to "\\sigma^2".
+#' @keywords internal
+#' @export
+#' @noRd
+#' @examples \dontrun{
+#' library(lme4)
+#' fm1 <- lmer(Reaction ~ Days + (Days | Subject), sleepstudy)
+#' equatiomatic:::create_fixed_merMod(fm1, FALSE)
+#' }
+create_l1.lmerMod <- function(model, mean_separate,
+                             ital_vars, wrap, terms_per_line,
+                             use_coefs, coef_digits, fix_signs,
+                             operator_location, sigma = "\\sigma^2",
+                             return_variances, swap_var_names, 
+                             swap_subscript_names,
+                             var_colors, var_subscript_colors) {
   
-  if(is.null(mean_separate)) {
+  rhs <- extract_rhs(model, return_variances)
+  lhs <- extract_lhs(model, ital_vars, use_coefs, swap_var_names, var_colors)
+  l1 <- create_l1_fixef(model, ital_vars, use_coefs, coef_digits, 
+                        mean_separate, fix_signs, wrap, terms_per_line, 
+                        operator_location, return_variances,
+                        swap_var_names, swap_subscript_names,
+                        var_colors, var_subscript_colors)
+  if (is.null(mean_separate)) {
     mean_separate <- sum(rhs$l1) > 3
   }
-  if(mean_separate) {
+  if (mean_separate) {
     paste0(lhs, " \\sim ", wrap_normal_dist("\\mu", sigma),
            " \\\\\n    \\mu &=", l1)
   }  else {
     paste(lhs, "\\sim", wrap_normal_dist(l1, sigma))
   }
 }
+
+#' @export
+#' @noRd
+create_l1.glmerMod <- function(model, mean_separate,
+                              ital_vars, wrap, terms_per_line,
+                              use_coefs, coef_digits, fix_signs,
+                              operator_location, sigma = "\\sigma^2",
+                              return_variances, swap_var_names, 
+                              swap_subscript_names,
+                              var_colors, var_subscript_colors) {
+  
+  rhs <- extract_rhs(model, return_variances)
+  lhs <- extract_lhs(model, ital_vars, use_coefs, swap_var_names, var_colors)
+  l1 <- create_l1_fixef(model, ital_vars, use_coefs, coef_digits, 
+                        mean_separate, fix_signs, wrap, terms_per_line, 
+                        operator_location, return_variances,
+                        swap_var_names, swap_subscript_names,
+                        var_colors, var_subscript_colors)
+  
+  combo <- paste0(which_family(model), "-", which_link(model))
+  
+  switch(
+    combo,
+    "binomial-logit" = binomial_logit_l1(model, lhs, l1, ital_vars),
+    "poisson-log" = poisson_log_l1(lhs, l1)
+  )
+}
+
+

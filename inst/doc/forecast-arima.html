@@ -54,7 +54,14 @@ document.addEventListener('DOMContentLoaded', function() {
     </style>
 
 
-<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  code {
+    white-space: pre;
+  }
+  .sourceCode {
+    overflow: visible;
+  }
+</style>
 <style type="text/css" data-origin="pandoc">
 pre > code.sourceCode { white-space: pre; position: relative; }
 pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
@@ -353,10 +360,11 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <span id="cb1-2"><a href="#cb1-2"></a><span class="kw">library</span>(forecast)</span>
 <span id="cb1-3"><a href="#cb1-3"></a></span>
 <span id="cb1-4"><a href="#cb1-4"></a><span class="co"># Build Arima (no regression)</span></span>
-<span id="cb1-5"><a href="#cb1-5"></a>simple_ts_mod &lt;-<span class="st"> </span><span class="kw">Arima</span>(simple_ts, </span>
-<span id="cb1-6"><a href="#cb1-6"></a>                       <span class="dt">order =</span> <span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>),</span>
-<span id="cb1-7"><a href="#cb1-7"></a>                       <span class="dt">seasonal =</span> <span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">0</span>,<span class="dv">1</span>),</span>
-<span id="cb1-8"><a href="#cb1-8"></a>                       <span class="dt">include.constant =</span> <span class="ot">TRUE</span>)</span></code></pre></div>
+<span id="cb1-5"><a href="#cb1-5"></a>simple_ts_mod &lt;-<span class="st"> </span><span class="kw">Arima</span>(simple_ts,</span>
+<span id="cb1-6"><a href="#cb1-6"></a>  <span class="dt">order =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>),</span>
+<span id="cb1-7"><a href="#cb1-7"></a>  <span class="dt">seasonal =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">1</span>),</span>
+<span id="cb1-8"><a href="#cb1-8"></a>  <span class="dt">include.constant =</span> <span class="ot">TRUE</span></span>
+<span id="cb1-9"><a href="#cb1-9"></a>)</span></code></pre></div>
 </div>
 <div id="extracting-the-equation" class="section level4">
 <h4>Extracting the equation</h4>
@@ -373,15 +381,18 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <div id="setup-1" class="section level4">
 <h4>Setup</h4>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a><span class="co"># Build Exogenous Regressors</span></span>
-<span id="cb3-2"><a href="#cb3-2"></a>xregs &lt;-<span class="st"> </span><span class="kw">as.matrix</span>(<span class="kw">data.frame</span>(<span class="dt">x1 =</span> ts_reg_list<span class="op">$</span>x1 <span class="op">+</span><span class="st"> </span><span class="dv">5</span>,</span>
-<span id="cb3-3"><a href="#cb3-3"></a>                              <span class="dt">x2 =</span> ts_reg_list<span class="op">$</span>x2 <span class="op">*</span><span class="st"> </span><span class="dv">5</span>))</span>
-<span id="cb3-4"><a href="#cb3-4"></a></span>
-<span id="cb3-5"><a href="#cb3-5"></a><span class="co"># Build Regression Model</span></span>
-<span id="cb3-6"><a href="#cb3-6"></a>ts_reg_mod &lt;-<span class="st"> </span><span class="kw">Arima</span>(<span class="kw">ts</span>(ts_reg_list<span class="op">$</span>ts_rnorm, <span class="dt">freq =</span> <span class="dv">4</span>), </span>
-<span id="cb3-7"><a href="#cb3-7"></a>                    <span class="dt">order =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>),</span>
-<span id="cb3-8"><a href="#cb3-8"></a>                    <span class="dt">seasonal =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">1</span>),</span>
-<span id="cb3-9"><a href="#cb3-9"></a>                    <span class="dt">xreg =</span> xregs,</span>
-<span id="cb3-10"><a href="#cb3-10"></a>                    <span class="dt">include.constant =</span> <span class="ot">TRUE</span>)</span></code></pre></div>
+<span id="cb3-2"><a href="#cb3-2"></a>xregs &lt;-<span class="st"> </span><span class="kw">as.matrix</span>(<span class="kw">data.frame</span>(</span>
+<span id="cb3-3"><a href="#cb3-3"></a>  <span class="dt">x1 =</span> ts_reg_list<span class="op">$</span>x1 <span class="op">+</span><span class="st"> </span><span class="dv">5</span>,</span>
+<span id="cb3-4"><a href="#cb3-4"></a>  <span class="dt">x2 =</span> ts_reg_list<span class="op">$</span>x2 <span class="op">*</span><span class="st"> </span><span class="dv">5</span></span>
+<span id="cb3-5"><a href="#cb3-5"></a>))</span>
+<span id="cb3-6"><a href="#cb3-6"></a></span>
+<span id="cb3-7"><a href="#cb3-7"></a><span class="co"># Build Regression Model</span></span>
+<span id="cb3-8"><a href="#cb3-8"></a>ts_reg_mod &lt;-<span class="st"> </span><span class="kw">Arima</span>(<span class="kw">ts</span>(ts_reg_list<span class="op">$</span>ts_rnorm, <span class="dt">freq =</span> <span class="dv">4</span>),</span>
+<span id="cb3-9"><a href="#cb3-9"></a>  <span class="dt">order =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>),</span>
+<span id="cb3-10"><a href="#cb3-10"></a>  <span class="dt">seasonal =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">1</span>),</span>
+<span id="cb3-11"><a href="#cb3-11"></a>  <span class="dt">xreg =</span> xregs,</span>
+<span id="cb3-12"><a href="#cb3-12"></a>  <span class="dt">include.constant =</span> <span class="ot">TRUE</span></span>
+<span id="cb3-13"><a href="#cb3-13"></a>)</span></code></pre></div>
 </div>
 <div id="extracting-the-equation-1" class="section level4">
 <h4>Extracting the equation</h4>
@@ -406,9 +417,9 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <h2>Future Development</h2>
 <p>Development items on the docket include:</p>
 <ul>
-<li>Testing additional functionality from <code>extract_eq()</code> for <code>lm</code> objects.</li>
-<li>Implementation of arguments that will allow the user to rename variables and/or specify a set of greek letters.</li>
-<li>If there is interest, the ability to switch to an expanded version of the equation. However, this could potentially generate extremely long and difficult to read equations.</li>
+<li><p>Testing additional functionality from <code>extract_eq()</code> for <code>lm</code> objects.</p></li>
+<li><p>Implementation of arguments that will allow the user to rename variables and/or specify a set of greek letters.</p></li>
+<li><p>If there is interest, the ability to switch to an expanded version of the equation. However, this could potentially generate extremely long and difficult to read equations.</p></li>
 </ul>
 <p>This is the first of (hopefully) most of the models in <code>forecast</code> being implemented in {equatiomatic}. <code>Arima</code> is one of the most used modeling techniques for time-series and, as such, got first treatment. There’s a lot we can do from here and I’m happy for any help or feedback from the community.</p>
 </div>
