@@ -1,4 +1,13 @@
-# equatiomatic (development version)
+# equatiomatic 0.3.1
+* Minor bug fix related to lifecycle badges
+* New license: CC-BY
+* Bug fix: If names overlap, prior version had an error with the ordering and
+    construction of the coefficients.
+* Bug fix: Prior versions did not escape characters in multilevel models when
+  declaring the grouping factor (e.g., `for census_division l = 1` is now 
+  rendered as `for census\_division l = 1`).
+
+# equatiomatic 0.3.0
 * Export new `renderEq()` and `eqOutput()` functions for working with equatiomatic with shiny.
 * Specific parts of the equation can now be colored with the new `greek_colors`, `subscript_colors`, `var_colors` and `var_subscript_colors` arguments.
 * Includes new `swap_var_names` and `swap_subscript_names` arguments to change
