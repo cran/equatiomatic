@@ -14,7 +14,6 @@ extract_lhs <- function(model, ...) {
 #'
 #' Extract a string of the outcome/dependent/y variable of a model
 #'
-#' @export
 #' @keywords internal
 #'
 #' @inheritParams extract_eq
@@ -22,19 +21,21 @@ extract_lhs <- function(model, ...) {
 #' @return A character string
 #' @noRd
 
-extract_lhs.lm <- function(model, ital_vars, show_distribution, use_coefs, 
-                           swap_var_names, var_colors) {
+extract_lhs.lm <- function(model, ital_vars, show_distribution, use_coefs,
+                           swap_var_names, var_colors, ...) {
+
+  check_dots(...)
   lhs <- rownames(attr(model$terms, "factors"))[1]
   lhs_nm <- lhs
   names(lhs) <- lhs_nm
-  
+
   if (!is.null(swap_var_names)) {
-    lhs <- swap_names(swap_var_names, lhs)[[1]]  
+    lhs <- swap_names(swap_var_names, lhs)[[1]]
   }
-  
+
   lhs_escaped <- escape_tex(lhs)
   names(lhs_escaped) <- lhs_nm
-  
+
   if (use_coefs) {
     lhs_escaped <- add_hat(lhs_escaped)
   }
@@ -46,29 +47,29 @@ extract_lhs.lm <- function(model, ital_vars, show_distribution, use_coefs,
 #'
 #' Extract a string of the outcome/dependent/y variable of a model
 #'
-#' @export
 #' @keywords internal
 #'
 #' @inheritParams extract_eq
 #'
 #' @return A character string
 #' @noRd
-extract_lhs.lmerMod <- function(model, ital_vars, use_coefs, swap_var_names, 
+extract_lhs.lmerMod <- function(model, ital_vars, use_coefs, swap_var_names,
                                 var_colors, ...) {
+  check_dots(...)
   lhs <- all.vars(formula(model))[1]
   lhs_nm <- lhs
   names(lhs) <- lhs_nm
-  
+
   if (!is.null(swap_var_names)) {
-    lhs <- swap_names(swap_var_names, lhs)[[1]]  
+    lhs <- swap_names(swap_var_names, lhs)[[1]]
   }
-  
+
   lhs_escaped <- escape_tex(lhs)
   if (use_coefs) {
     lhs_escaped <- add_hat(lhs_escaped)
   }
   lhs_escaped <- add_tex_ital_v(lhs_escaped, ital_vars)
-  
+
   names(lhs_escaped) <-lhs_nm
   lhs_escaped <- colorize_terms(var_colors, list(lhs), list(lhs_escaped))
   paste0(lhs_escaped, "_{i}")
@@ -78,7 +79,6 @@ extract_lhs.lmerMod <- function(model, ital_vars, use_coefs, swap_var_names,
 #'
 #' Extract a string of the outcome/dependent/y variable of a model
 #'
-#' @export
 #' @keywords internal
 #'
 #' @inheritParams extract_eq
@@ -94,7 +94,6 @@ extract_lhs.glmerMod <- function(model, ital_vars, use_coefs, ...) {
 #' Extract a string of the outcome/dependent/y variable with the appropriate
 #' link function.
 #'
-#' @export
 #' @keywords internal
 #'
 #' @inheritParams extract_eq
@@ -102,11 +101,11 @@ extract_lhs.glmerMod <- function(model, ital_vars, use_coefs, ...) {
 #' @return A character string
 #' @noRd
 
-extract_lhs.glm <- function(model, ital_vars, show_distribution, use_coefs, 
+extract_lhs.glm <- function(model, ital_vars, show_distribution, use_coefs,
                             swap_var_names, var_colors,...) {
   if (show_distribution) {
     if (model$family$family == "binomial") {
-      return(extract_lhs2_binomial(model, ital_vars, use_coefs, 
+      return(extract_lhs2_binomial(model, ital_vars, use_coefs,
                                    swap_var_names, var_colors))
     } else {
       message("This distribution is not presently supported; the distribution assumption
@@ -114,19 +113,19 @@ extract_lhs.glm <- function(model, ital_vars, show_distribution, use_coefs,
       lhs <- all.vars(formula(model))[1]
       lhs_nm <- lhs
       names(lhs) <- lhs_nm
-      
+
       if (!is.null(swap_var_names)) {
-        lhs <- swap_names(swap_var_names, lhs)[[1]]  
+        lhs <- swap_names(swap_var_names, lhs)[[1]]
       }
-      
+
       lhs_escaped <- escape_tex(lhs)
-      
+
       if(!is.null(var_colors)) {
         names(lhs) <- lhs_nm
         names(lhs_escaped) <- lhs_nm
         lhs_escaped <- colorize_terms(var_colors, list(lhs), list(lhs_escaped))
       }
-      
+
       full_lhs <- paste("E(", add_tex_ital_v(lhs_escaped, ital_vars), ")")
       if (use_coefs) {
         full_lhs <- add_hat(full_lhs)
@@ -137,25 +136,25 @@ extract_lhs.glm <- function(model, ital_vars, show_distribution, use_coefs,
     }
   }
   if (model$family$family == "binomial") {
-    return(extract_lhs_binomial(model, ital_vars, use_coefs, 
+    return(extract_lhs_binomial(model, ital_vars, use_coefs,
                                 swap_var_names, var_colors))
   } else {
     lhs <- all.vars(formula(model))[1]
     lhs_nm <- lhs
     names(lhs) <- lhs_nm
-    
+
     if (!is.null(swap_var_names)) {
-      lhs <- swap_names(swap_var_names, lhs)[[1]]  
+      lhs <- swap_names(swap_var_names, lhs)[[1]]
     }
-    
+
     lhs_escaped <- escape_tex(lhs)
-    
+
     if(!is.null(var_colors)) {
       names(lhs) <- lhs_nm
       names(lhs_escaped) <- lhs_nm
       lhs_escaped <- colorize_terms(var_colors, list(lhs), list(lhs_escaped))
     }
-    
+
     full_lhs <- paste("E(", add_tex_ital(lhs, ital_vars), ")")
     if (use_coefs) {
       full_lhs <- add_hat(full_lhs)
@@ -175,11 +174,11 @@ extract_lhs_binomial <- function(model, ital_vars, use_coefs,
   outcome <- all.vars(formula(model))[1]
   outcome_nm <- outcome
   names(outcome) <- outcome_nm
-  
+
   if (!is.null(swap_var_names)) {
-    outcome <- swap_names(swap_var_names, outcome)[[1]]  
+    outcome <- swap_names(swap_var_names, outcome)[[1]]
   }
-  
+
   # This returns a 1x1 data.frame
   ss <- model$data[which(model$y == 1)[1], outcome_nm]
 
@@ -191,17 +190,17 @@ extract_lhs_binomial <- function(model, ital_vars, use_coefs,
 
   ss_escaped <- escape_tex(ss)
   ss_escaped <- add_tex_ital_v(ss_escaped, ital_vars)
-  
+
   if(!is.null(var_colors)) {
     names(outcome) <- outcome_nm
     names(outcome_escaped) <- outcome_nm
     outcome_escaped <- colorize_terms(var_colors, list(outcome), list(outcome_escaped))
-    
+
     names(ss) <- outcome_nm
     names(ss_escaped) <- outcome_nm
     ss_escaped <- colorize_terms(var_colors, list(outcome), list(ss_escaped))
   }
-  
+
   if (is.na(ss)) {
     full_lhs <- paste("P(", outcome_escaped, ")")
   } else {
@@ -227,11 +226,11 @@ extract_lhs2_binomial <- function(model, ital_vars, use_coefs, swap_var_names,
   outcome <- all.vars(formula(model))[1]
   outcome_nm <- outcome
   names(outcome) <- outcome_nm
-  
+
   if (!is.null(swap_var_names)) {
-    outcome <- swap_names(swap_var_names, outcome)[[1]]  
+    outcome <- swap_names(swap_var_names, outcome)[[1]]
   }
-  
+
   n <- unique(model$model$`(weights)`)
   if (is.null(n)) {
     n <- nrow(model$data)
@@ -252,20 +251,20 @@ extract_lhs2_binomial <- function(model, ital_vars, use_coefs, swap_var_names,
 
   outcome_escaped <- escape_tex(outcome)
   outcome_escaped <- add_tex_ital_v(outcome_escaped, ital_vars)
-  
+
   ss_escaped <- escape_tex(ss)
   ss_escaped <- add_tex_ital_v(ss_escaped, ital_vars)
-  
+
   if(!is.null(var_colors)) {
     names(outcome) <- outcome_nm
     names(outcome_escaped) <- outcome_nm
     outcome_escaped <- colorize_terms(var_colors, list(outcome), list(outcome_escaped))
-    
+
     names(ss) <- outcome_nm
     names(ss_escaped) <- outcome_nm
     ss_escaped <- colorize_terms(var_colors, list(outcome), list(ss_escaped))
   }
-  
+
   p <- paste0(
     "\\operatorname{prob}",
     add_tex_subscripts(
@@ -295,7 +294,6 @@ extract_lhs2_binomial <- function(model, ital_vars, use_coefs, swap_var_names,
 #' Extract a string of the outcome/dependent/y variable with the appropriate
 #' link function.
 #'
-#' @export
 #' @keywords internal
 #'
 #' @inheritParams extract_eq
@@ -307,10 +305,17 @@ extract_lhs.polr <- function(model, ital_vars, ...) {
   tidied <- broom::tidy(model)
   lhs <- tidied$term[tidied$coef.type == "scale"]
   lhs_escaped <- mapply_chr(escape_tex, lhs)
+  threshold_focal <- lapply(
+    strsplit(lhs_escaped, "\\|"),
+    `[[`,
+    1
+  )
+  lhs <- lapply(threshold_focal, add_tex_ital_v, ital_vars)
+  outcome <- add_tex_ital_v(escape_tex(all.vars(formula(model))[1]), ital_vars)
 
-  lhs <- lapply(strsplit(lhs_escaped, "\\|"), add_tex_ital_v, ital_vars)
-  lhs <- lapply(lhs, paste, collapse = " \\geq ")
+  lhs <- lapply(lhs, function(.x) paste(outcome, " \\leq ", .x))
   lhs <- lapply(lhs, function(.x) paste0("P( ", .x, " )"))
+
   full_lhs <- lapply(lhs, function(.x) modify_lhs_for_link(model, .x))
 
   class(full_lhs) <- c("list", class(model))
@@ -323,7 +328,6 @@ extract_lhs.polr <- function(model, ital_vars, ...) {
 #' Extract a string of the outcome/dependent/y variable with the appropriate
 #' link function.
 #'
-#' @export
 #' @keywords internal
 #'
 #' @inheritParams extract_eq
@@ -335,9 +339,16 @@ extract_lhs.clm <- function(model, ital_vars, ...) {
   tidied <- broom::tidy(model)
   lhs <- tidied$term[tidied$coef.type == "intercept"]
   lhs_escaped <- mapply_chr(escape_tex, lhs)
+  threshold_focal <- lapply(
+    strsplit(lhs_escaped, "\\|"),
+    `[[`,
+    1
+  )
 
-  lhs <- lapply(strsplit(lhs_escaped, "\\|"), add_tex_ital_v, ital_vars)
-  lhs <- lapply(lhs, paste, collapse = " \\geq ")
+  lhs <- lapply(threshold_focal, add_tex_ital_v, ital_vars)
+  outcome <- add_tex_ital_v(escape_tex(all.vars(formula(model))[1]), ital_vars)
+
+  lhs <- lapply(lhs, function(.x) paste(outcome, " \\leq ", .x))
   lhs <- lapply(lhs, function(.x) paste("P(", .x, ")"))
   full_lhs <- lapply(lhs, function(.x) modify_lhs_for_link(model, .x))
 
@@ -353,10 +364,10 @@ modify_lhs_for_link <- function(model, ...) {
   UseMethod("modify_lhs_for_link", model)
 }
 
-#' @export
 #' @keywords internal
 #' @noRd
-modify_lhs_for_link.glm <- function(model, lhs) {
+modify_lhs_for_link.glm <- function(model, lhs, ...) {
+  check_dots(...)
   if (!(any(grepl(model$family$link, link_function_df$link_name)))) {
     message("This link function is not presently supported; using an identity
               function instead")
@@ -370,20 +381,21 @@ modify_lhs_for_link.glm <- function(model, lhs) {
   gsub("y", lhs, filtered_link_formula, fixed = TRUE)
 }
 
-#' @export
 #' @keywords internal
 #' @noRd
-modify_lhs_for_link.polr <- function(model, lhs) {
+modify_lhs_for_link.polr <- function(model, lhs, ...) {
+  check_dots(...)
   matched_row_bool <- grepl(model$method, link_function_df$link_name)
   filtered_link_formula <- link_function_df[matched_row_bool, "link_formula"]
 
   gsub("y", lhs, filtered_link_formula, fixed = TRUE)
 }
 
-#' @export
 #' @keywords internal
 #' @noRd
-modify_lhs_for_link.clm <- function(model, lhs) {
+modify_lhs_for_link.clm <- function(model, lhs, ...) {
+
+  check_dots(...)
   if (!(any(grepl(model$info$link, link_function_df$link_name)))) {
     message("This link function is not presently supported; using an identity
               function instead")
@@ -437,7 +449,7 @@ link_function_df <- data.frame(link_name, link_formula,
 #' @noRd
 extract_lhs.forecast_ARIMA <- function(model, ...) {
   # LHS of ARIMA is the Auto Regressive side
-  # Consists of Non-Seasonal AR (p), Seasonal AR (P), Non-Seasonal Differencing 
+  # Consists of Non-Seasonal AR (p), Seasonal AR (P), Non-Seasonal Differencing
   # (d), Seasonal Differencing(D), Constant Terms.
   # Constants are dealt with here if they go here and in LM if they go there.
 

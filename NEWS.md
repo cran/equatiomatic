@@ -1,3 +1,17 @@
+# equatiomatic 0.3.3
+* Vignette 'intro-equatiomatic' renamed 'equatiomatic' to enable a "Getting
+    Started" entry in the pkgdown site.
+* Documentation was cleaned up. In particular, methods for internal generics are
+    not exported any more. All methods for `extract_eq()` are now properly
+    documented in the `extract_eq()` help page.
+
+# equatiomatic 0.3.2
+* New maintainer (Philippe Grosjean phgrosjean@sciviews.org).
+* Remotes to yonicd/texPreview eliminated because a suitable version is on CRAN.
+* Respect of the arguments of the generic functions for
+    `add_greek.forecast_ARIMA` and `add_coefs.forecast_ARIMA` (first argument
+    `side=` is renamed `rhs=`).
+
 # equatiomatic 0.3.1
 * Minor bug fix related to lifecycle badges
 * New license: CC-BY
@@ -6,6 +20,7 @@
 * Bug fix: Prior versions did not escape characters in multilevel models when
   declaring the grouping factor (e.g., `for census_division l = 1` is now 
   rendered as `for census\_division l = 1`).
+* Feature addition: added `se_subscripts` argument, which allows the standard error for each coefficient to be included in parentheses below the coefficient when `se_subscripts = TRUE`. This is supported for `lm` and `glm` models.
 
 # equatiomatic 0.3.0
 * Export new `renderEq()` and `eqOutput()` functions for working with equatiomatic with shiny.

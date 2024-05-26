@@ -1,10 +1,9 @@
-create_eq <- function(lhs, ...) {
-  UseMethod("create_eq", lhs)
+create_eq <- function(model, lhs, ...) {
+  UseMethod("create_eq", model)
 }
 
 #' Create the full equation
 #'
-#' @export
 #' @keywords internal
 #'
 #' @param lhs A character string of the left-hand side variable extracted with
@@ -20,7 +19,9 @@ create_eq.default <- function(model, lhs, rhs, ital_vars, use_coefs, coef_digits
                               greek_colors, subscript_colors, 
                               var_colors, var_subscript_colors,
                               raw_tex, index_factors, swap_var_names, 
-                              swap_subscript_names) {
+                              swap_subscript_names, ...) {
+
+   check_dots(...)
   rhs$final_terms <- create_term(rhs, ital_vars, 
                                  swap_var_names, swap_subscript_names, 
                                  var_colors, var_subscript_colors)
@@ -59,7 +60,6 @@ create_eq.default <- function(model, lhs, rhs, ital_vars, use_coefs, coef_digits
   list(lhs = list(lhs), rhs = list(rhs$final_terms))
 }
 
-#' @export
 #' @noRd
 #' @inheritParams extract_eq
 create_eq.glm <- function(model, lhs, rhs, ital_vars, use_coefs, coef_digits,
@@ -67,7 +67,8 @@ create_eq.glm <- function(model, lhs, rhs, ital_vars, use_coefs, coef_digits,
                           greek_colors, subscript_colors, 
                           var_colors, var_subscript_colors,
                           raw_tex, index_factors,
-                          swap_var_names, swap_subscript_names) {
+                          swap_var_names, swap_subscript_names, ...) {
+  check_dots(...)
   rhs$final_terms <- create_term(rhs, ital_vars, swap_var_names, 
                                  swap_subscript_names,
                                  var_colors, var_subscript_colors)
@@ -99,14 +100,15 @@ create_eq.glm <- function(model, lhs, rhs, ital_vars, use_coefs, coef_digits,
   list(lhs = list(lhs), rhs = list(rhs$final_terms))
 }
 
-#' @export
 #' @noRd
 create_eq.polr <- function(model, lhs, rhs, ital_vars, use_coefs, coef_digits,
                            fix_signs, intercept, greek, 
                            greek_colors, subscript_colors, 
                            var_colors, var_subscript_colors,
                            raw_tex, index_factors,
-                           swap_var_names, swap_subscript_names) {
+                           swap_var_names, swap_subscript_names, ...) {
+
+  check_dots(...)
   rhs$final_terms <- create_term(rhs, ital_vars, swap_var_names, 
                                  swap_subscript_names,
                                  var_colors, var_subscript_colors)
@@ -137,14 +139,14 @@ create_eq.polr <- function(model, lhs, rhs, ital_vars, use_coefs, coef_digits,
   list(lhs = lhs, rhs = rhs_final)
 }
 
-#' @export
 #' @noRd
 create_eq.clm <- function(model, lhs, rhs, ital_vars, use_coefs, coef_digits,
                           fix_signs, intercept, greek, 
                           greek_colors, subscript_colors, 
                           var_colors, var_subscript_colors,
                           raw_tex, index_factors,
-                          swap_var_names, swap_subscript_names) {
+                          swap_var_names, swap_subscript_names, ...) {
+  check_dots(...)
   rhs$final_terms <- create_term(rhs, ital_vars, swap_var_names, 
                                  swap_subscript_names,
                                  var_colors, var_subscript_colors)
@@ -303,10 +305,10 @@ create_term <- function(side, ...) {
 }
 
 #' @noRd
-#' @export
 create_term.default <- function(side, ital_vars, swap_var_names, 
                                 swap_subscript_names, var_colors,
-                                var_subscript_colors) {
+                                var_subscript_colors, ...) {
+  check_dots(...)
   side$primary <- lapply(side$primary, function(x) {
     names(x) <- x
     x
@@ -396,9 +398,9 @@ check_math <- function(primary, subscripts) {
 #'
 #' @inheritParams extract_eq
 #' @noRd
-#' @export
 create_term.forecast_ARIMA <- function(side, ital_vars, swap_var_names,
-                                       swap_subscript_names) {
+                                       swap_subscript_names, ...) {
+  check_dots(...)
   if (!is.null(swap_var_names)) {
     side$primary <- swap_names(swap_var_names, side$primary)
   }
@@ -628,11 +630,11 @@ add_coefs <- function(rhs, ...) {
 
 #' Add coefficient values to the equation
 #'
-#' @export
 #' @keywords internal
 #' @noRd
 
-add_coefs.default <- function(rhs, term, coef_digits) {
+add_coefs.default <- function(rhs, term, coef_digits, ...) {
+  check_dots(...)
   ests <- round(rhs$estimate, coef_digits)
   ifelse(
     rhs$term == "(Intercept)",
@@ -641,11 +643,11 @@ add_coefs.default <- function(rhs, term, coef_digits) {
   )
 }
 
-#' @export
 #' @keywords internal
 #' @noRd
 
-add_coefs.polr <- function(rhs, term, coef_digits) {
+add_coefs.polr <- function(rhs, term, coef_digits, ...) {
+  check_dots(...)
   ests <- round(rhs$estimate, coef_digits)
   ifelse(
     rhs$coef.type == "scale",
@@ -654,11 +656,11 @@ add_coefs.polr <- function(rhs, term, coef_digits) {
   )
 }
 
-#' @export
 #' @keywords internal
 #' @noRd
 
-add_coefs.clm <- function(rhs, term, coef_digits) {
+add_coefs.clm <- function(rhs, term, coef_digits, ...) {
+  check_dots(...)
   ests <- round(rhs$estimate, coef_digits)
   ifelse(
     rhs$coef.type == "intercept",
@@ -671,12 +673,13 @@ add_coefs.clm <- function(rhs, term, coef_digits) {
 #'
 #' @keywords internal
 #' @noRd
-add_coefs.forecast_ARIMA <- function(side, term, coef_digits, side_sign = 1) {
+add_coefs.forecast_ARIMA <- function(rhs, term, coef_digits, side_sign = 1, ...) {
+  check_dots(...)
   # Round the estimates and turn to a character vector
-  ests <- round(side$estimate, coef_digits)
+  ests <- round(rhs$estimate, coef_digits)
 
   # Use signif on anything where the round returns a zero
-  ests[ests == 0 & !is.na(ests)] <- signif(side$estimate[ests == 0 & !is.na(ests)], 1)
+  ests[ests == 0 & !is.na(ests)] <- signif(rhs$estimate[ests == 0 & !is.na(ests)], 1)
 
   # Deal with signs
   ## Flip sign if needed
@@ -702,13 +705,13 @@ add_greek <- function(rhs, ...) {
 
 #' Adds greek symbols to the equation
 #'
-#' @export
 #' @keywords internal
 #' @noRd
 
 add_greek.default <- function(rhs, terms, greek = "beta", intercept = "alpha",
                               greek_colors, subscript_colors,
-                              raw_tex = FALSE) {
+                              raw_tex = FALSE, ...) {
+  check_dots(...)
   int <- switch(intercept,
     "alpha" = "\\alpha",
     "beta" = "\\beta_{0}"
@@ -736,7 +739,6 @@ add_greek.default <- function(rhs, terms, greek = "beta", intercept = "alpha",
   )
 }
 
-#' @export
 #' @keywords internal
 #' @noRd
 
@@ -764,7 +766,6 @@ add_greek.polr <- function(rhs, terms, greek, intercept, greek_colors,
   )
 }
 
-#' @export
 #' @keywords internal
 #' @noRd
 
@@ -796,7 +797,7 @@ add_greek.clm <- function(rhs, terms, greek, intercept, greek_colors,
 #'
 #' @keywords internal
 #' @noRd
-add_greek.forecast_ARIMA <- function(side, terms, regression, raw_tex = FALSE, side_sign = 1) {
+add_greek.forecast_ARIMA <- function(rhs, terms, regression, raw_tex = FALSE, side_sign = 1, ...) {
   # These are the greek letters we need to use in REGEX
   # Others will be assigned manually
   greek_letters <- c(
@@ -811,37 +812,37 @@ add_greek.forecast_ARIMA <- function(side, terms, regression, raw_tex = FALSE, s
   # We are going to use lapply to walk and change things for us.
   # Note the <<-. This affects something outside the function.
   # This is just a fancy for loop.
-  greek <- rep("", nrow(side))
+  greek <- rep("", nrow(rhs))
   invisible(
     lapply(names(greek_letters), function(x) {
-      greek[grepl(x, side$term)] <<- greek_letters[x]
+      greek[grepl(x, rhs$term)] <<- greek_letters[x]
     })
   )
 
 
-  # To make life easier, we"re including the greek parsing for
+  # To make life easier, we are including the greek parsing for
   # the linear component here too.
-  if (sum(grepl("^s?ar|^s?ma", side$term)) == 0) {
+  if (sum(grepl("^s?ar|^s?ma", rhs$term)) == 0) {
     # Then we are dealing with the linear component and not the ARIMA component
 
     # Beta will serve as the main letter for the linear component
     # Anything in greek that is blank, wasn"t accounted for with known paramters.
-    greek[greek == "" & side$term != "y0"] <- "beta"
+    greek[greek == "" & rhs$term != "y0"] <- "beta"
 
     # Generate the subs for the greek letters
     ## Initialize the vector
-    subs <- rep("", nrow(side))
+    subs <- rep("", nrow(rhs))
 
     ## Give numbers to non-constants
-    int_drift_y0 <- !(side$term %in% c("intercept", "drift", "y0"))
+    int_drift_y0 <- !(rhs$term %in% c("intercept", "drift", "y0"))
     subs[int_drift_y0] <- as.character(1:sum(int_drift_y0))
   } else {
     # Deal with ARIMA component
 
     # Format the greek letters to vibe with the final_terms
     # This is done, in part, with anno_greek for other functions.
-    subs <- rep("", nrow(side))
-    subs[grepl("^s?ar|^s?ma", side$term)] <- gsub("^s?ar|^s?ma", "", side$term[grepl("^s?ar|^s?ma", side$term)])
+    subs <- rep("", nrow(rhs))
+    subs[grepl("^s?ar|^s?ma", rhs$term)] <- gsub("^s?ar|^s?ma", "", rhs$term[grepl("^s?ar|^s?ma", rhs$term)])
   }
 
   # Add subscripts to greek
@@ -854,7 +855,7 @@ add_greek.forecast_ARIMA <- function(side, terms, regression, raw_tex = FALSE, s
 
   # Deal with signs on greek letters
   signs <- rep("", length(greek))
-  signs[!(side$term %in% c("zz_differencing", "zz_seas_Differencing"))] <- if (side_sign > 0) "+" else "-"
+  signs[!(rhs$term %in% c("zz_differencing", "zz_seas_Differencing"))] <- if (side_sign > 0) "+" else "-"
 
   # Combine the final terms with the greek letters
   final_terms <- paste0(signs, greek, terms)

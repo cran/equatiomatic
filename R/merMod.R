@@ -755,7 +755,6 @@ create_l1 <- function(model, ...) {
 #'   names not be wrapped in the \code{\\operatorname{}} command?
 #' @param sigma The error term. Defaults to "\\sigma^2".
 #' @keywords internal
-#' @export
 #' @noRd
 #' @examples \dontrun{
 #' library(lme4)
@@ -768,7 +767,8 @@ create_l1.lmerMod <- function(model, mean_separate,
                              operator_location, sigma = "\\sigma^2",
                              return_variances, swap_var_names, 
                              swap_subscript_names,
-                             var_colors, var_subscript_colors) {
+                             var_colors, var_subscript_colors, ...) {
+  check_dots(...)
   
   rhs <- extract_rhs(model, return_variances)
   lhs <- extract_lhs(model, ital_vars, use_coefs, swap_var_names, var_colors)
@@ -788,15 +788,14 @@ create_l1.lmerMod <- function(model, mean_separate,
   }
 }
 
-#' @export
-#' @noRd
 create_l1.glmerMod <- function(model, mean_separate,
                               ital_vars, wrap, terms_per_line,
                               use_coefs, coef_digits, fix_signs,
                               operator_location, sigma = "\\sigma^2",
                               return_variances, swap_var_names, 
                               swap_subscript_names,
-                              var_colors, var_subscript_colors) {
+                              var_colors, var_subscript_colors, ...) {
+  check_dots(...)
   
   rhs <- extract_rhs(model, return_variances)
   lhs <- extract_lhs(model, ital_vars, use_coefs, swap_var_names, var_colors)

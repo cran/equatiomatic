@@ -2,7 +2,7 @@
 % Please edit documentation in R/extract_eq.R
 \name{extract_eq}
 \alias{extract_eq}
-\title{'LaTeX' code for R models}
+\title{'LaTeX' equation for R models}
 \usage{
 extract_eq(
   model,
@@ -27,8 +27,9 @@ extract_eq(
   coef_digits = 2,
   fix_signs = TRUE,
   font_size = NULL,
-  mean_separate,
+  mean_separate = NULL,
   return_variances = FALSE,
+  se_subscripts = FALSE,
   ...
 )
 }
@@ -119,7 +120,7 @@ estimates be included in the equation instead of math symbols?}
 \item{coef_digits}{Integer, defaults to 2. The number of decimal places to
 round to when displaying model estimates.}
 
-\item{fix_signs}{Logical, defaults to \code{FALSE}. If disabled,
+\item{fix_signs}{Logical, defaults to \code{TRUE}. If disabled,
 coefficient estimates that are negative are preceded with a "+" (e.g.
 \code{5(x) + -3(z)}). If enabled, the "+ -" is replaced with a "-" (e.g.
 \code{5(x) - 3(z)}).}
@@ -141,16 +142,29 @@ effects model (e.g., \code{lme4::lmer()}), should the variances and
 co-variances be returned? If \code{FALSE} (the default) standard deviations
 and correlations are returned instead.}
 
+\item{se_subscripts}{Logical. If \code{se_subscripts = TRUE} then the
+equation will include the standard errors below each coefficient.
+This is supported for lm and glm models.}
+
 \item{...}{Additional arguments (for future development; not currently used).}
 }
 \value{
 A character of class \dQuote{equation}.
 }
 \description{
-\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#maturing}{\figure{lifecycle-maturing.svg}{options: alt='[Maturing]'}}}{\strong{[Maturing]}}
-Extract the variable names from a model to produce a 'LaTeX' equation, which is
-output to the screen. Supports any model supported by
-\link[broom:reexports]{broom::tidy}.
+Extract the variable names from a model to produce a 'LaTeX' equation.
+Supports any model where there is a \code{\link[broom:reexports]{broom::tidy()}} method. This is a generic
+function with methods for lmerMod objects obtained with \code{\link[lme4:lmer]{lme4::lmer()}},
+glmerMod objects with \code{\link[lme4:glmer]{lme4::glmer()}}, forecast_ARIMA with
+\code{\link[forecast:Arima]{forecast::Arima()}} and default, with the later further covering most "base"
+R models implemented in \code{\link[broom:reexports]{broom::tidy()}} like lm objects with \code{\link[stats:lm]{stats::lm()}},
+glm objects with \code{\link[stats:glm]{stats::glm()}} or polr objects with \code{\link[MASS:polr]{MASS::polr()}}. The
+default method also supports clm objects obtained with \code{\link[ordinal:clm]{ordinal::clm()}}.
+}
+\details{
+The different methods all use the same arguments, but not all arguments are
+suitable to all models. Check here above to determine if a feature is
+implemented for a given model.
 }
 \examples{
 # Simple model

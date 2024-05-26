@@ -1,10 +1,10 @@
 Package: equatiomatic
 Title: Transform Models into 'LaTeX' Equations
-Version: 0.3.1
+Version: 0.3.3
 Authors@R: 
     c(person(given = "Daniel",
              family = "Anderson",
-             role = c("aut", "cre"),
+             role = "aut",
              email = "daniela@uoregon.edu",
              comment = c(ORCID = "https://orcid.org/0000-0003-4699-4680")),
       person(given = "Andrew",
@@ -45,7 +45,18 @@ Authors@R:
              family = "Patil",
              role = "ctb",
              email = "patilindrajeet.science@gmail.com",
-             comment = c(ORCID = "0000-0003-1995-6531", Twitter = "@patilindrajeets")))
+             comment = c(ORCID = "0000-0003-1995-6531", Twitter = "@patilindrajeets")),
+      person(given = "Quinn",
+             family = "White",
+             role = "ctb",
+             email = "quinnarlise@gmail.com",
+             comment = c(ORCID = "https://orcid.org/0000-0001-5399-0237")),
+      person(given = "Philippe",
+             family = "Grosjean",
+             role = "cre",
+             email = "phgrosjean@sciviews.org",
+             comment = c(ORCID = "0000-0002-2694-9471")))
+Maintainer: Philippe Grosjean <phgrosjean@sciviews.org>
 Description: The goal of 'equatiomatic' is to reduce the pain
     associated with writing 'LaTeX' formulas from fitted models. The
     primary function of the package, extract_eq(), takes a fitted model
@@ -59,16 +70,17 @@ BugReports: https://github.com/datalorax/equatiomatic/issues
 Imports: broom (>= 0.7.0), broom.mixed, shiny, knitr, stats, utils
 Suggests: covr, shinyWidgets, forecast (>= 8.13), ggplot2 (>= 3.3.3),
         latex2exp (>= 0.4.0), lme4, MASS, ordinal, rmarkdown, testthat
-        (>= 3.0.0), texPreview, gtsummary
+        (>= 3.0.0), texPreview (>= 2.0.0), gtsummary, spelling
 VignetteBuilder: knitr
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.3
 Config/testthat/edition: 3
 Config/testthat/parallel: true
+Language: en-US
 NeedsCompilation: no
-Packaged: 2022-01-29 06:17:16 UTC; daniel
-Author: Daniel Anderson [aut, cre] (<https://orcid.org/0000-0003-4699-4680>),
+Packaged: 2024-05-25 12:00:28 UTC; phgrosjean
+Author: Daniel Anderson [aut] (<https://orcid.org/0000-0003-4699-4680>),
   Andrew Heiss [aut] (<https://orcid.org/0000-0002-3948-3914>),
   Jay Sumners [aut],
   Joshua Rosenberg [ctb] (<https://orcid.org/0000-0003-2170-0447>),
@@ -77,7 +89,8 @@ Author: Daniel Anderson [aut, cre] (<https://orcid.org/0000-0003-4699-4680>),
   Thomas Fung [ctb] (<https://orcid.org/0000-0003-2601-0728>),
   Reza Norouzian [ctb] (<https://orcid.org/0000-0002-0531-6886>),
   Indrajeet Patil [ctb] (<https://orcid.org/0000-0003-1995-6531>,
-    @patilindrajeets)
-Maintainer: Daniel Anderson <daniela@uoregon.edu>
+    @patilindrajeets),
+  Quinn White [ctb] (<https://orcid.org/0000-0001-5399-0237>),
+  Philippe Grosjean [cre] (<https://orcid.org/0000-0002-2694-9471>)
 Repository: CRAN
-Date/Publication: 2022-01-30 23:20:02 UTC
+Date/Publication: 2024-05-26 17:30:06 UTC
