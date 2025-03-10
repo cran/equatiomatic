@@ -60,7 +60,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
 { counter-reset: source-line 0; }
@@ -342,8 +342,8 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <p>This vignette is intended to show the wide variety of
 <code>lme4::lmer</code> models that can be handled by {equatiomatic}.
-The output uses the notation from <a href="http://www.stat.columbia.edu/~gelman/arm/">Gelman and Hill</a>. If
-you notice any errors in the notation, please <a href="https://github.com/datalorax/equatiomatic/issues">file an
+The output uses the notation from <a href="https://sites.stat.columbia.edu/gelman/arm/">Gelman and Hill</a>.
+If you notice any errors in the notation, please <a href="https://github.com/datalorax/equatiomatic/issues">file an
 issue</a>. Similarly, if you try to use {equatiomatic} with an lmer
 model and end up with an error (either in notation or code) I would
 <em>really</em> appreciate if you could file an issue with a
@@ -1033,7 +1033,7 @@ where it can. Note that, again, this model produces a warning.</p>
 <span id="cb19-3"><a href="#cb19-3" tabindex="-1"></a><span class="at">data =</span> hsb</span>
 <span id="cb19-4"><a href="#cb19-4" tabindex="-1"></a>)</span>
 <span id="cb19-5"><a href="#cb19-5" tabindex="-1"></a><span class="co">#&gt; Warning in checkConv(attr(opt, &quot;derivs&quot;), opt$par, ctrl = control$checkConv, :</span></span>
-<span id="cb19-6"><a href="#cb19-6" tabindex="-1"></a><span class="co">#&gt; Model failed to converge with max|grad| = 0.00320004 (tol = 0.002, component 1)</span></span>
+<span id="cb19-6"><a href="#cb19-6" tabindex="-1"></a><span class="co">#&gt; Model failed to converge with max|grad| = 0.00319829 (tol = 0.002, component 1)</span></span>
 <span id="cb19-7"><a href="#cb19-7" tabindex="-1"></a><span class="fu">extract_eq</span>(hsb_doublegroup)</span></code></pre></div>
 <p><span class="math display">\[
 \begin{aligned}
@@ -1289,8 +1289,8 @@ predictors.</p>
 ,
 \left(
   \begin{array}{cc}
-     0 &amp; -1 \\
-     -1 &amp; 0
+     0 &amp; 1 \\
+     1 &amp; 0
   \end{array}
 \right)
 \right)

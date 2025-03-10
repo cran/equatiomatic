@@ -1,14 +1,15 @@
-## ---- include = FALSE---------------------------------------------------------
+## ----include = FALSE----------------------------------------------------------
 library(equatiomatic)
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
 
-## ---- warning = FALSE, results = 'markup'-------------------------------------
+## ----warning = FALSE, results = 'markup'--------------------------------------
+data("penguins", package = "equatiomatic")
 lm(bill_length_mm ~ bill_depth_mm, penguins)
 
-## ---- echo = FALSE------------------------------------------------------------
+## ----echo = FALSE-------------------------------------------------------------
 library(equatiomatic)
 extract_eq(lm(bill_length_mm ~ bill_depth_mm, penguins))
 
@@ -96,7 +97,7 @@ extract_eq(pr, wrap = TRUE)
 extract_eq(pr, wrap = TRUE, show_distribution = TRUE)
 
 ## ----install-ordinal, eval = FALSE--------------------------------------------
-#  install.packages("ordinal")
+# install.packages("ordinal")
 
 ## ----wine-data, echo = FALSE--------------------------------------------------
 knitr::kable(head(ordinal::wine), align = "l")

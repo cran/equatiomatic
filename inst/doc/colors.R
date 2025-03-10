@@ -1,4 +1,4 @@
-## ---- include = FALSE---------------------------------------------------------
+## ----include = FALSE----------------------------------------------------------
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
@@ -15,6 +15,7 @@ colorize_text <- function(x, color) {
 
 ## -----------------------------------------------------------------------------
 library(equatiomatic)
+data("penguins", package = "equatiomatic")
 slr <- lm(bill_length_mm ~ body_mass_g, data = penguins)
 
 ## -----------------------------------------------------------------------------
@@ -140,23 +141,23 @@ extract_eq(
 )
 
 ## ----eval = FALSE-------------------------------------------------------------
-#  create_eq(m_categorical) %>%
-#    swap_var_names(
-#      "bill_length_mm" = "Bill Length (MM)",
-#      "species" = "Species",
-#      "island" = "Island"
-#    ) %>%
-#    swap_subscript_names(
-#      Chinstrap = "little buddy",
-#      Gentoo = "happy feet"
-#    ) %>%
-#    colorize_variables(
-#      species = "#FB2C4B",
-#      island = "#643B77"
-#    ) %>%
-#    colorize_variable_subscripts(
-#      species = "#0274B2",
-#      island = "#FBA640"
-#    ) %>%
-#    wrap(terms_per_line = 3)
+# create_eq(m_categorical) %>%
+#   swap_var_names(
+#     "bill_length_mm" = "Bill Length (MM)",
+#     "species" = "Species",
+#     "island" = "Island"
+#   ) %>%
+#   swap_subscript_names(
+#     Chinstrap = "little buddy",
+#     Gentoo = "happy feet"
+#   ) %>%
+#   colorize_variables(
+#     species = "#FB2C4B",
+#     island = "#643B77"
+#   ) %>%
+#   colorize_variable_subscripts(
+#     species = "#0274B2",
+#     island = "#FBA640"
+#   ) %>%
+#   wrap(terms_per_line = 3)
 

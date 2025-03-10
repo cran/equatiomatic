@@ -1,4 +1,4 @@
-## ---- include = FALSE---------------------------------------------------------
+## ----include = FALSE----------------------------------------------------------
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
@@ -13,6 +13,7 @@ library(latex2exp)
 library(equatiomatic)
 
 ## ----model_setup--------------------------------------------------------------
+data("penguins", package = "equatiomatic")
 # Fit an lm model
 m <- lm(body_mass_g ~ bill_length_mm, penguins)
 

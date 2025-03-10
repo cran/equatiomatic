@@ -60,7 +60,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
 { counter-reset: source-line 0; }
@@ -358,35 +358,37 @@ something like</p>
 <span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="fu">library</span>(gtsummary)</span>
 <span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="fu">library</span>(gt)</span>
 <span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a></span>
-<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a>ui <span class="ot">&lt;-</span> <span class="fu">fluidPage</span>(</span>
-<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a>  <span class="fu">titlePanel</span>(<span class="st">&quot;equatiomatic w/Shiny&quot;</span>),</span>
-<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a>  <span class="fu">sidebarLayout</span>(</span>
-<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a>    <span class="fu">sidebarPanel</span>(</span>
-<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a>      <span class="fu">multiInput</span>(</span>
-<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a>        <span class="at">inputId =</span> <span class="st">&quot;xvars&quot;</span>, <span class="at">label =</span> <span class="st">&quot;Select predictor variables :&quot;</span>,</span>
-<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a>        <span class="at">choices =</span> <span class="fu">names</span>(penguins)[<span class="sc">-</span><span class="dv">3</span>],</span>
-<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a>        <span class="at">selected =</span> <span class="st">&quot;island&quot;</span></span>
-<span id="cb1-15"><a href="#cb1-15" tabindex="-1"></a>      )</span>
-<span id="cb1-16"><a href="#cb1-16" tabindex="-1"></a>    ),</span>
-<span id="cb1-17"><a href="#cb1-17" tabindex="-1"></a>    <span class="fu">mainPanel</span>(</span>
-<span id="cb1-18"><a href="#cb1-18" tabindex="-1"></a>      <span class="fu">gt_output</span>(<span class="st">&quot;tbl&quot;</span>)</span>
-<span id="cb1-19"><a href="#cb1-19" tabindex="-1"></a>    )</span>
-<span id="cb1-20"><a href="#cb1-20" tabindex="-1"></a>  )</span>
-<span id="cb1-21"><a href="#cb1-21" tabindex="-1"></a>)</span>
-<span id="cb1-22"><a href="#cb1-22" tabindex="-1"></a></span>
-<span id="cb1-23"><a href="#cb1-23" tabindex="-1"></a>server <span class="ot">&lt;-</span> <span class="cf">function</span>(input, output) {</span>
-<span id="cb1-24"><a href="#cb1-24" tabindex="-1"></a>  model <span class="ot">&lt;-</span> <span class="fu">reactive</span>({</span>
-<span id="cb1-25"><a href="#cb1-25" tabindex="-1"></a>    form <span class="ot">&lt;-</span> <span class="fu">paste</span>(<span class="st">&quot;bill_length_mm ~ &quot;</span>, <span class="fu">paste</span>(input<span class="sc">$</span>xvars, <span class="at">collapse =</span> <span class="st">&quot; + &quot;</span>))</span>
-<span id="cb1-26"><a href="#cb1-26" tabindex="-1"></a>    <span class="fu">lm</span>(<span class="fu">as.formula</span>(form), penguins)</span>
-<span id="cb1-27"><a href="#cb1-27" tabindex="-1"></a>  })</span>
-<span id="cb1-28"><a href="#cb1-28" tabindex="-1"></a>  </span>
-<span id="cb1-29"><a href="#cb1-29" tabindex="-1"></a>  output<span class="sc">$</span>tbl <span class="ot">&lt;-</span> <span class="fu">render_gt</span>({</span>
-<span id="cb1-30"><a href="#cb1-30" tabindex="-1"></a>    <span class="fu">as_gt</span>(<span class="fu">tbl_regression</span>(<span class="fu">model</span>()))</span>
-<span id="cb1-31"><a href="#cb1-31" tabindex="-1"></a>  })</span>
-<span id="cb1-32"><a href="#cb1-32" tabindex="-1"></a>  </span>
-<span id="cb1-33"><a href="#cb1-33" tabindex="-1"></a>}</span>
-<span id="cb1-34"><a href="#cb1-34" tabindex="-1"></a></span>
-<span id="cb1-35"><a href="#cb1-35" tabindex="-1"></a><span class="fu">shinyApp</span>(<span class="at">ui =</span> ui, <span class="at">server =</span> server)</span></code></pre></div>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;penguins&quot;</span>, <span class="at">package =</span> <span class="st">&quot;equatiomatic&quot;</span>)</span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a>ui <span class="ot">&lt;-</span> <span class="fu">fluidPage</span>(</span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a>  <span class="fu">titlePanel</span>(<span class="st">&quot;equatiomatic w/Shiny&quot;</span>),</span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a>  <span class="fu">sidebarLayout</span>(</span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a>    <span class="fu">sidebarPanel</span>(</span>
+<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a>      <span class="fu">multiInput</span>(</span>
+<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a>        <span class="at">inputId =</span> <span class="st">&quot;xvars&quot;</span>, <span class="at">label =</span> <span class="st">&quot;Select predictor variables :&quot;</span>,</span>
+<span id="cb1-15"><a href="#cb1-15" tabindex="-1"></a>        <span class="at">choices =</span> <span class="fu">names</span>(penguins)[<span class="sc">-</span><span class="dv">3</span>],</span>
+<span id="cb1-16"><a href="#cb1-16" tabindex="-1"></a>        <span class="at">selected =</span> <span class="st">&quot;island&quot;</span></span>
+<span id="cb1-17"><a href="#cb1-17" tabindex="-1"></a>      )</span>
+<span id="cb1-18"><a href="#cb1-18" tabindex="-1"></a>    ),</span>
+<span id="cb1-19"><a href="#cb1-19" tabindex="-1"></a>    <span class="fu">mainPanel</span>(</span>
+<span id="cb1-20"><a href="#cb1-20" tabindex="-1"></a>      <span class="fu">gt_output</span>(<span class="st">&quot;tbl&quot;</span>)</span>
+<span id="cb1-21"><a href="#cb1-21" tabindex="-1"></a>    )</span>
+<span id="cb1-22"><a href="#cb1-22" tabindex="-1"></a>  )</span>
+<span id="cb1-23"><a href="#cb1-23" tabindex="-1"></a>)</span>
+<span id="cb1-24"><a href="#cb1-24" tabindex="-1"></a></span>
+<span id="cb1-25"><a href="#cb1-25" tabindex="-1"></a>server <span class="ot">&lt;-</span> <span class="cf">function</span>(input, output) {</span>
+<span id="cb1-26"><a href="#cb1-26" tabindex="-1"></a>  model <span class="ot">&lt;-</span> <span class="fu">reactive</span>({</span>
+<span id="cb1-27"><a href="#cb1-27" tabindex="-1"></a>    form <span class="ot">&lt;-</span> <span class="fu">paste</span>(<span class="st">&quot;bill_length_mm ~ &quot;</span>, <span class="fu">paste</span>(input<span class="sc">$</span>xvars, <span class="at">collapse =</span> <span class="st">&quot; + &quot;</span>))</span>
+<span id="cb1-28"><a href="#cb1-28" tabindex="-1"></a>    <span class="fu">lm</span>(<span class="fu">as.formula</span>(form), penguins)</span>
+<span id="cb1-29"><a href="#cb1-29" tabindex="-1"></a>  })</span>
+<span id="cb1-30"><a href="#cb1-30" tabindex="-1"></a>  </span>
+<span id="cb1-31"><a href="#cb1-31" tabindex="-1"></a>  output<span class="sc">$</span>tbl <span class="ot">&lt;-</span> <span class="fu">render_gt</span>({</span>
+<span id="cb1-32"><a href="#cb1-32" tabindex="-1"></a>    <span class="fu">as_gt</span>(<span class="fu">tbl_regression</span>(<span class="fu">model</span>()))</span>
+<span id="cb1-33"><a href="#cb1-33" tabindex="-1"></a>  })</span>
+<span id="cb1-34"><a href="#cb1-34" tabindex="-1"></a>  </span>
+<span id="cb1-35"><a href="#cb1-35" tabindex="-1"></a>}</span>
+<span id="cb1-36"><a href="#cb1-36" tabindex="-1"></a></span>
+<span id="cb1-37"><a href="#cb1-37" tabindex="-1"></a><span class="fu">shinyApp</span>(<span class="at">ui =</span> ui, <span class="at">server =</span> server)</span></code></pre></div>
 <p>But, naturally, we’d probably also want the equation rendered too. We
 can extend The above with <strong>equatiomatic</strong> as follows.</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">library</span>(equatiomatic)</span>
