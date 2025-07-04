@@ -449,8 +449,7 @@ specify wrapping, and how many terms per line</p>
 <div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>lev1_long <span class="ot">&lt;-</span> <span class="fu">lmer</span>(score <span class="sc">~</span> wave <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> sid) <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> school) <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> district),</span>
 <span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>  <span class="at">data =</span> sim_longitudinal</span>
 <span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>)</span>
-<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="co">#&gt; boundary (singular) fit: see help(&#39;isSingular&#39;)</span></span>
-<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a><span class="fu">extract_eq</span>(lev1_long)</span></code></pre></div>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="fu">extract_eq</span>(lev1_long)</span></code></pre></div>
 <p><span class="math display">\[
 \begin{aligned}
   \operatorname{score}_{i}  &amp;\sim N \left(\alpha_{j[i],k[i],l[i]} +
@@ -563,8 +562,9 @@ warning.</p>
 <span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>    (ses <span class="sc">*</span> female <span class="sc">+</span> minority <span class="sc">|</span> sch.id),</span>
 <span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a>  hsb</span>
 <span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a>)</span>
-<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a><span class="co">#&gt; boundary (singular) fit: see help(&#39;isSingular&#39;)</span></span>
-<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a><span class="fu">extract_eq</span>(hsb3)</span></code></pre></div>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a><span class="co">#&gt; Warning in checkConv(attr(opt, &quot;derivs&quot;), opt$par, ctrl = control$checkConv, :</span></span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a><span class="co">#&gt; Model failed to converge with max|grad| = 0.00753228 (tol = 0.002, component 1)</span></span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a><span class="fu">extract_eq</span>(hsb3)</span></code></pre></div>
 <p><span class="math display">\[
 \begin{aligned}
   \operatorname{math}_{i}  &amp;\sim N \left(\mu, \sigma^2 \right) \\
@@ -1033,7 +1033,7 @@ where it can. Note that, again, this model produces a warning.</p>
 <span id="cb19-3"><a href="#cb19-3" tabindex="-1"></a><span class="at">data =</span> hsb</span>
 <span id="cb19-4"><a href="#cb19-4" tabindex="-1"></a>)</span>
 <span id="cb19-5"><a href="#cb19-5" tabindex="-1"></a><span class="co">#&gt; Warning in checkConv(attr(opt, &quot;derivs&quot;), opt$par, ctrl = control$checkConv, :</span></span>
-<span id="cb19-6"><a href="#cb19-6" tabindex="-1"></a><span class="co">#&gt; Model failed to converge with max|grad| = 0.00319829 (tol = 0.002, component 1)</span></span>
+<span id="cb19-6"><a href="#cb19-6" tabindex="-1"></a><span class="co">#&gt; Model failed to converge with max|grad| = 0.00319906 (tol = 0.002, component 1)</span></span>
 <span id="cb19-7"><a href="#cb19-7" tabindex="-1"></a><span class="fu">extract_eq</span>(hsb_doublegroup)</span></code></pre></div>
 <p><span class="math display">\[
 \begin{aligned}
@@ -1289,8 +1289,8 @@ predictors.</p>
 ,
 \left(
   \begin{array}{cc}
-     0 &amp; 1 \\
-     1 &amp; 0
+     0 &amp; -1 \\
+     -1 &amp; 0
   \end{array}
 \right)
 \right)

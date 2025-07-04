@@ -410,8 +410,8 @@ different examples.</p>
 <span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
 <span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">&quot;lm&quot;</span>, <span class="at">color =</span> <span class="st">&quot;#ab00fa&quot;</span>) <span class="sc">+</span></span>
 <span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>  <span class="fu">annotate</span>(<span class="st">&quot;text&quot;</span>,</span>
-<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>    <span class="at">label =</span> <span class="fu">TeX</span>(prep_eq), <span class="at">x =</span> <span class="dv">35</span>, <span class="at">y =</span> <span class="dv">2500</span>, <span class="at">hjust =</span> <span class="dv">0</span>,</span>
-<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>    <span class="at">color =</span> <span class="st">&quot;#ab00fa&quot;</span></span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>    <span class="at">label =</span> <span class="fu">as.character</span>(<span class="fu">TeX</span>(prep_eq)), <span class="at">x =</span> <span class="dv">35</span>, <span class="at">y =</span> <span class="dv">2500</span>, <span class="at">hjust =</span> <span class="dv">0</span>,</span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>    <span class="at">color =</span> <span class="st">&quot;#ab00fa&quot;</span>, <span class="at">parse =</span> <span class="cn">TRUE</span></span>
 <span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a>  ) <span class="sc">+</span></span>
 <span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;Relation between bill length and body mass&quot;</span>) <span class="sc">+</span></span>
 <span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a>  <span class="fu">ylim</span>(<span class="dv">2000</span>, <span class="dv">6500</span>)</span></code></pre></div>

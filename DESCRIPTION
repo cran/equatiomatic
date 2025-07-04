@@ -1,6 +1,6 @@
 Package: equatiomatic
 Title: Transform Models into 'LaTeX' Equations
-Version: 0.3.6
+Version: 0.3.7
 Authors@R: 
     c(person(given = "Daniel",
              family = "Anderson",
@@ -59,7 +59,17 @@ Authors@R:
              family = "Grosjean",
              role = "cre",
              email = "phgrosjean@sciviews.org",
-             comment = c(ORCID = "0000-0002-2694-9471")))
+             comment = c(ORCID = "0000-0002-2694-9471")),
+      person(given = "Teun",
+             family = "van den Brand",
+             role = "ctb",
+             email = "t.vandenbrand@nki.nl",
+             comment = c(ORCID = "0000-0002-9335-7468")),
+      person(given = "Guyliann",
+             family = "Engels",
+             role = "ctb",
+             email = "guyliann.engels@umons.ac.be",
+             comment = c(ORCID = "0000-0001-9514-1014")))
 Maintainer: Philippe Grosjean <phgrosjean@sciviews.org>
 Description: The goal of 'equatiomatic' is to reduce the pain
     associated with writing 'LaTeX' formulas from fitted models. The
@@ -83,18 +93,22 @@ Config/testthat/edition: 3
 Config/testthat/parallel: true
 Language: en-US
 NeedsCompilation: no
-Packaged: 2025-03-09 14:39:32 UTC; phgrosjean
-Author: Daniel Anderson [aut] (<https://orcid.org/0000-0003-4699-4680>),
-  Andrew Heiss [aut] (<https://orcid.org/0000-0002-3948-3914>),
+Packaged: 2025-07-04 08:13:21 UTC; phgrosjean
+Author: Daniel Anderson [aut] (ORCID: <https://orcid.org/0000-0003-4699-4680>),
+  Andrew Heiss [aut] (ORCID: <https://orcid.org/0000-0002-3948-3914>),
   Jay Sumners [aut],
-  Joshua Rosenberg [ctb] (<https://orcid.org/0000-0003-2170-0447>),
-  Jonathan Sidi [ctb] (<https://orcid.org/0000-0002-4222-1819>),
-  Ellis Hughes [ctb] (<https://orcid.org/0000-0003-0637-4436>),
-  Thomas Fung [ctb] (<https://orcid.org/0000-0003-2601-0728>),
-  Reza Norouzian [ctb] (<https://orcid.org/0000-0002-0531-6886>),
-  Indrajeet Patil [ctb] (<https://orcid.org/0000-0003-1995-6531>),
-  Quinn White [ctb] (<https://orcid.org/0000-0001-5399-0237>),
+  Joshua Rosenberg [ctb] (ORCID: <https://orcid.org/0000-0003-2170-0447>),
+  Jonathan Sidi [ctb] (ORCID: <https://orcid.org/0000-0002-4222-1819>),
+  Ellis Hughes [ctb] (ORCID: <https://orcid.org/0000-0003-0637-4436>),
+  Thomas Fung [ctb] (ORCID: <https://orcid.org/0000-0003-2601-0728>),
+  Reza Norouzian [ctb] (ORCID: <https://orcid.org/0000-0002-0531-6886>),
+  Indrajeet Patil [ctb] (ORCID: <https://orcid.org/0000-0003-1995-6531>),
+  Quinn White [ctb] (ORCID: <https://orcid.org/0000-0001-5399-0237>),
   David Kane [ctb],
-  Philippe Grosjean [cre] (<https://orcid.org/0000-0002-2694-9471>)
+  Philippe Grosjean [cre] (ORCID:
+    <https://orcid.org/0000-0002-2694-9471>),
+  Teun van den Brand [ctb] (ORCID:
+    <https://orcid.org/0000-0002-9335-7468>),
+  Guyliann Engels [ctb] (ORCID: <https://orcid.org/0000-0001-9514-1014>)
 Repository: CRAN
-Date/Publication: 2025-03-10 16:50:09 UTC
+Date/Publication: 2025-07-04 09:00:06 UTC
